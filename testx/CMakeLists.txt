@@ -4,10 +4,9 @@ if (oneapi)
   #include_directories(../inc)
   #target_compile_definitions(CoordsOneAPI PUBLIC ROOT_MATH_SYCL)
   #add_sycl_to_root_target(TARGET CoordsOneAPI SOURCES Coords.cpp)
- 
+  message (STATUS "SYCL_COMPILER ${SYCL_COMPILER}")
   add_custom_command(OUTPUT CoordsOneAPI
-    COMMAND ${SYCL_COMPILER} 
-    ARGS ${SYCL_FLAGS}
+    COMMAND ${SYCL_COMPILER} Coords.cpp ${SYCL_FLAGS}
     DEPENDS ${_deps}
     COMMENT "Building SYCL object ${CoordsOneAPI}"
     MAIN_DEPENDENCY Coords.cpp
@@ -20,11 +19,11 @@ if (opensycl)
   target_link_libraries(CoordsOpenSYCL PUBLIC GenVectorX)
   include_directories(../inc)
   target_compile_definitions(CoordsOpenSYCL PUBLIC ROOT_MATH_SYCL)
-  #add_sycl_to_root_target(TARGET CoordsOpenSYCL SOURCES Coords.cpp)
+  add_sycl_to_root_target(TARGET CoordsOpenSYCL SOURCES Coords.cpp)
 endif()
 
 if ( (NOT oneapi) AND (NOT opensycl) )
-  add_executable(Coords Coords.cpp)
+  add_executable(Coords Coords.cpp) 
   target_link_libraries(Coords PUBLIC GenVectorX)
   include_directories(../inc)
 endif()

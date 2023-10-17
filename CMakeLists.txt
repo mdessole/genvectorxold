@@ -2,6 +2,8 @@ project(genvectorx)
 
 cmake_minimum_required(VERSION 3.9)
 
+
+
 if (oneapi)
    SET(_sycl_search_dirs ${SYCL_ROOT_DIR} /usr/lib /usr/local/lib /opt/intel/oneapi/compiler/latest/linux)
    find_program(SYCL_COMPILER
@@ -73,6 +75,7 @@ if (opensycl)
     set(sycl OFF CACHE BOOL "Disabled because OpenSYCL is enabled" FORCE)
   else()
     find_package(OpenSYCL)
+    #add_definitions(-DHIPSYCL_DEBUG_LEVEL=4)
     if (OpenSYCL_FOUND)
       set(sycl ON)
       function(add_sycl_to_root_target)
