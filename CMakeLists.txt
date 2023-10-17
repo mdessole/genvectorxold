@@ -158,6 +158,26 @@ if (nocompile)
   endif()
 endif()
 
+add_library(SYCLMath SHARED
+inc/SYCLMath/GenVector/MathUtil.h
+)
+
+set_target_properties(SYCLMath PROPERTIES LINKER_LANGUAGE CXX)
+
+if (opensycl)
+    #set_target_properties(GenVector PROPERTIES LINKER_LANGUAGE CXX)
+    target_compile_definitions(SYCLMath PUBLIC ROOT_MATH_SYCL)
+    add_sycl_to_target(TARGET SYCLMath inc/SYCLMath/GenVector/MathUtil.h)
+endif()
+
+  if (oneapi)
+    #set_target_properties(GenVector PROPERTIES LINKER_LANGUAGE CXX)
+    target_compile_definitions(SYCLMath PUBLIC ROOT_MATH_SYCL)
+    add_sycl_to_target(TARGET SYCLMath inc/SYCLMath/GenVector/MathUtil.h)
+  endif()
+
+
+
 add_library(GenVectorX SHARED
     inc/SYCLMath/AxisAngle.h
     inc/SYCLMath/Boost.h
@@ -207,7 +227,6 @@ add_library(GenVectorX SHARED
     inc/SYCLMath/GenVector/LorentzRotation.h
     inc/SYCLMath/GenVector/LorentzVectorfwd.h
     inc/SYCLMath/GenVector/LorentzVector.h
-    inc/SYCLMath/GenVector/MathUtil.h
     inc/SYCLMath/GenVector/Plane3D.h
     inc/SYCLMath/GenVector/Polar2Dfwd.h
     inc/SYCLMath/GenVector/Polar2D.h
@@ -274,18 +293,9 @@ add_library(GenVectorX SHARED
 
 set_target_properties(GenVectorX PROPERTIES LINKER_LANGUAGE CXX)
 
-if (opensycl)
-  #set_target_properties(GenVector PROPERTIES LINKER_LANGUAGE CXX)
-  #target_compile_definitions(GenVectorX INTERFACE CL_TARGET_OPENCL_VERSION=300)
-  target_compile_definitions(GenVectorX PUBLIC ROOT_MATH_SYCL)
-  #target_compile_options(GenVectorX INTERFACE -O2)
-  #target_include_directories(GenVectorX INTERFACE ${OpenSYCL_INCLUDE_DIRS})
-  #target_link_libraries(GenVectorX INTERFACE OpenSYCL::hipSYCL-rt)
-  #add_sycl_to_target(TARGET GenVectorX inc/SYCLMath/GenVector /MathUtil.h)
-  add_sycl_to_root_target(TARGET GenVectorX inc/SYCLMath/GenVector/MathUtil.h)
-endif()
+target_link_libraries(GenVectorX PUBLIC SYCLMath)
 
-install(TARGETS GenVectorX
+install(TARGETS GenVectorX SYCLMath
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
