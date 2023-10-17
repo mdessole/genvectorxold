@@ -7,13 +7,13 @@
 #include "Math/Cartesian2D.h"
 #include "Math/Vector2D.h"
 
-
 // using namespace ROOT::Math;
-using vec2d = ROOT::Experimental::DisplacementVector2D<ROOT::Experimental::Cartesian2D<double>>;
-using vec2dR = ROOT::Math::DisplacementVector2D<ROOT::Math::Cartesian2D<double>>;
+using vec2d = ROOT::Experimental::DisplacementVector2D<
+    ROOT::Experimental::Cartesian2D<double>>;
+using vec2dR =
+    ROOT::Math::DisplacementVector2D<ROOT::Math::Cartesian2D<double>>;
 
-template<class V>
-void print_vec2d(V v, const char *name) {
+template <class V> void print_vec2d(V v, const char *name) {
   std::cout << name << " : " << v.x() << ", " << v.y() << std::endl;
 }
 

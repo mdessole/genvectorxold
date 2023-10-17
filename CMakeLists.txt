@@ -109,7 +109,6 @@ FORCE)
   endif()
 endif()
 
-add_definitions(-DHIPSYCL_DEBUG_LEVEL=${ACPP_DEBUG_LEVEL})
 
 if (nocompile)
   ROOT_LINKER_LIBRARY(GenVector
@@ -310,4 +309,8 @@ if (nocompile)
   ROOT_ADD_TEST_SUBDIRECTORY(test)
 
   ROOT_INSTALL_HEADERS()
+endif()
+
+if (testing)
+ add_subdirectory(testx)
 endif()
