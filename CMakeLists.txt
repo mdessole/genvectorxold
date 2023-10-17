@@ -142,7 +142,7 @@ if (nocompile)
     target_compile_options(GenVector INTERFACE -O2)
     target_include_directories(GenVector INTERFACE ${OpenSYCL_INCLUDE_DIRS})
     target_link_libraries(GenVector INTERFACE OpenSYCL::hipSYCL-rt)
-    add_sycl_to_target(TARGET GenVector inc/Math/GenVector/MathUtil.h)
+    add_sycl_to_target(TARGET GenVector inc/SYCLMath/GenVector/MathUtil.h)
   endif()
 
   if (oneapi)
@@ -152,122 +152,122 @@ if (nocompile)
     target_compile_options(GenVector INTERFACE -O2)
     target_include_directories(GenVector INTERFACE ${OpenSYCL_INCLUDE_DIRS})
     target_link_libraries(GenVector INTERFACE OpenSYCL::hipSYCL-rt)
-    add_sycl_to_target(TARGET GenVector inc/Math/GenVector/MathUtil.h)
+    add_sycl_to_target(TARGET GenVector inc/SYCLMath/GenVector/MathUtil.h)
   endif()
 endif()
 
 add_library(GenVectorX SHARED
-    inc/Math/AxisAngle.h
-    inc/Math/Boost.h
-    inc/Math/BoostX.h
-    inc/Math/BoostY.h
-    inc/Math/BoostZ.h
-    inc/Math/Cartesian2D.h
-    inc/Math/Cartesian3D.h
-    inc/Math/Cylindrical3D.h
-    inc/Math/CylindricalEta3D.h
-    inc/Math/DisplacementVector2D.h
-    inc/Math/DisplacementVector3D.h
-    inc/Math/EulerAngles.h
-    inc/Math/GenVector/3DConversions.h
-    inc/Math/GenVector/3DDistances.h
-    inc/Math/GenVector/AxisAnglefwd.h
-    inc/Math/GenVector/AxisAngle.h
-    inc/Math/GenVector/BitReproducible.h
-    inc/Math/GenVector/Boostfwd.h
-    inc/Math/GenVector/Boost.h
-    inc/Math/GenVector/BoostXfwd.h
-    inc/Math/GenVector/BoostX.h
-    inc/Math/GenVector/BoostYfwd.h
-    inc/Math/GenVector/BoostY.h
-    inc/Math/GenVector/BoostZfwd.h
-    inc/Math/GenVector/BoostZ.h
-    inc/Math/GenVector/Cartesian2Dfwd.h
-    inc/Math/GenVector/Cartesian2D.h
-    inc/Math/GenVector/Cartesian3Dfwd.h
-    inc/Math/GenVector/Cartesian3D.h
-    inc/Math/GenVector/CoordinateSystemTags.h
-    inc/Math/GenVector/Cylindrical3Dfwd.h
-    inc/Math/GenVector/Cylindrical3D.h
-    inc/Math/GenVector/CylindricalEta3Dfwd.h
-    inc/Math/GenVector/CylindricalEta3D.h
-    inc/Math/GenVector/DisplacementVector2Dfwd.h
-    inc/Math/GenVector/DisplacementVector2D.h
-    inc/Math/GenVector/DisplacementVector3Dfwd.h
-    inc/Math/GenVector/DisplacementVector3D.h
-    inc/Math/GenVector/eta.h
-    inc/Math/GenVector/etaMax.h
-    inc/Math/GenVector/EulerAnglesfwd.h
-    inc/Math/GenVector/EulerAngles.h
-    inc/Math/GenVector/GenVector_exception.h
-    inc/Math/GenVector/GenVectorIO.h
-    inc/Math/GenVector/LorentzRotationfwd.h
-    inc/Math/GenVector/LorentzRotation.h
-    inc/Math/GenVector/LorentzVectorfwd.h
-    inc/Math/GenVector/LorentzVector.h
-    inc/Math/GenVector/MathUtil.h
-    inc/Math/GenVector/Plane3D.h
-    inc/Math/GenVector/Polar2Dfwd.h
-    inc/Math/GenVector/Polar2D.h
-    inc/Math/GenVector/Polar3Dfwd.h
-    inc/Math/GenVector/Polar3D.h
-    inc/Math/GenVector/PositionVector2Dfwd.h
-    inc/Math/GenVector/PositionVector2D.h
-    inc/Math/GenVector/PositionVector3Dfwd.h
-    inc/Math/GenVector/PositionVector3D.h
-    inc/Math/GenVector/PtEtaPhiE4Dfwd.h
-    inc/Math/GenVector/PtEtaPhiE4D.h
-    inc/Math/GenVector/PtEtaPhiM4Dfwd.h
-    inc/Math/GenVector/PtEtaPhiM4D.h
-    inc/Math/GenVector/PxPyPzE4Dfwd.h
-    inc/Math/GenVector/PxPyPzE4D.h
-    inc/Math/GenVector/PxPyPzM4Dfwd.h
-    inc/Math/GenVector/PxPyPzM4D.h
-    inc/Math/GenVector/Quaternionfwd.h
-    inc/Math/GenVector/Quaternion.h
-    inc/Math/GenVector/Rotation3Dfwd.h
-    inc/Math/GenVector/Rotation3D.h
-    inc/Math/GenVector/RotationXfwd.h
-    inc/Math/GenVector/RotationX.h
-    inc/Math/GenVector/RotationYfwd.h
-    inc/Math/GenVector/RotationY.h
-    inc/Math/GenVector/RotationZfwd.h
-    inc/Math/GenVector/RotationZ.h
-    inc/Math/GenVector/RotationZYXfwd.h
-    inc/Math/GenVector/RotationZYX.h
-    inc/Math/GenVector/Transform3D.h
-    inc/Math/GenVector/Translation3D.h
-    inc/Math/GenVector/VectorUtil.h
-    inc/Math/LorentzRotation.h
-    inc/Math/LorentzVector.h
-    inc/Math/Plane3D.h
-    inc/Math/Point2Dfwd.h
-    inc/Math/Point2D.h
-    inc/Math/Point3Dfwd.h
-    inc/Math/Point3D.h
-    inc/Math/Polar2D.h
-    inc/Math/Polar3D.h
-    inc/Math/PositionVector2D.h
-    inc/Math/PositionVector3D.h
-    inc/Math/PtEtaPhiE4D.h
-    inc/Math/PtEtaPhiM4D.h
-    inc/Math/PxPyPzE4D.h
-    inc/Math/PxPyPzM4D.h
-    inc/Math/Quaternion.h
-    inc/Math/Rotation3D.h
-    inc/Math/RotationX.h
-    inc/Math/RotationY.h
-    inc/Math/RotationZ.h
-    inc/Math/RotationZYX.h
-    inc/Math/Transform3D.h
-    inc/Math/Translation3D.h
-    inc/Math/Vector2Dfwd.h
-    inc/Math/Vector2D.h
-    inc/Math/Vector3Dfwd.h
-    inc/Math/Vector3D.h
-    inc/Math/Vector4Dfwd.h
-    inc/Math/Vector4D.h
-    inc/Math/VectorUtil.h
+    inc/SYCLMath/AxisAngle.h
+    inc/SYCLMath/Boost.h
+    inc/SYCLMath/BoostX.h
+    inc/SYCLMath/BoostY.h
+    inc/SYCLMath/BoostZ.h
+    inc/SYCLMath/Cartesian2D.h
+    inc/SYCLMath/Cartesian3D.h
+    inc/SYCLMath/Cylindrical3D.h
+    inc/SYCLMath/CylindricalEta3D.h
+    inc/SYCLMath/DisplacementVector2D.h
+    inc/SYCLMath/DisplacementVector3D.h
+    inc/SYCLMath/EulerAngles.h
+    inc/SYCLMath/GenVector/3DConversions.h
+    inc/SYCLMath/GenVector/3DDistances.h
+    inc/SYCLMath/GenVector/AxisAnglefwd.h
+    inc/SYCLMath/GenVector/AxisAngle.h
+    inc/SYCLMath/GenVector/BitReproducible.h
+    inc/SYCLMath/GenVector/Boostfwd.h
+    inc/SYCLMath/GenVector/Boost.h
+    inc/SYCLMath/GenVector/BoostXfwd.h
+    inc/SYCLMath/GenVector/BoostX.h
+    inc/SYCLMath/GenVector/BoostYfwd.h
+    inc/SYCLMath/GenVector/BoostY.h
+    inc/SYCLMath/GenVector/BoostZfwd.h
+    inc/SYCLMath/GenVector/BoostZ.h
+    inc/SYCLMath/GenVector/Cartesian2Dfwd.h
+    inc/SYCLMath/GenVector/Cartesian2D.h
+    inc/SYCLMath/GenVector/Cartesian3Dfwd.h
+    inc/SYCLMath/GenVector/Cartesian3D.h
+    inc/SYCLMath/GenVector/CoordinateSystemTags.h
+    inc/SYCLMath/GenVector/Cylindrical3Dfwd.h
+    inc/SYCLMath/GenVector/Cylindrical3D.h
+    inc/SYCLMath/GenVector/CylindricalEta3Dfwd.h
+    inc/SYCLMath/GenVector/CylindricalEta3D.h
+    inc/SYCLMath/GenVector/DisplacementVector2Dfwd.h
+    inc/SYCLMath/GenVector/DisplacementVector2D.h
+    inc/SYCLMath/GenVector/DisplacementVector3Dfwd.h
+    inc/SYCLMath/GenVector/DisplacementVector3D.h
+    inc/SYCLMath/GenVector/eta.h
+    inc/SYCLMath/GenVector/etaMax.h
+    inc/SYCLMath/GenVector/EulerAnglesfwd.h
+    inc/SYCLMath/GenVector/EulerAngles.h
+    inc/SYCLMath/GenVector/GenVector_exception.h
+    inc/SYCLMath/GenVector/GenVectorIO.h
+    inc/SYCLMath/GenVector/LorentzRotationfwd.h
+    inc/SYCLMath/GenVector/LorentzRotation.h
+    inc/SYCLMath/GenVector/LorentzVectorfwd.h
+    inc/SYCLMath/GenVector/LorentzVector.h
+    inc/SYCLMath/GenVector/MathUtil.h
+    inc/SYCLMath/GenVector/Plane3D.h
+    inc/SYCLMath/GenVector/Polar2Dfwd.h
+    inc/SYCLMath/GenVector/Polar2D.h
+    inc/SYCLMath/GenVector/Polar3Dfwd.h
+    inc/SYCLMath/GenVector/Polar3D.h
+    inc/SYCLMath/GenVector/PositionVector2Dfwd.h
+    inc/SYCLMath/GenVector/PositionVector2D.h
+    inc/SYCLMath/GenVector/PositionVector3Dfwd.h
+    inc/SYCLMath/GenVector/PositionVector3D.h
+    inc/SYCLMath/GenVector/PtEtaPhiE4Dfwd.h
+    inc/SYCLMath/GenVector/PtEtaPhiE4D.h
+    inc/SYCLMath/GenVector/PtEtaPhiM4Dfwd.h
+    inc/SYCLMath/GenVector/PtEtaPhiM4D.h
+    inc/SYCLMath/GenVector/PxPyPzE4Dfwd.h
+    inc/SYCLMath/GenVector/PxPyPzE4D.h
+    inc/SYCLMath/GenVector/PxPyPzM4Dfwd.h
+    inc/SYCLMath/GenVector/PxPyPzM4D.h
+    inc/SYCLMath/GenVector/Quaternionfwd.h
+    inc/SYCLMath/GenVector/Quaternion.h
+    inc/SYCLMath/GenVector/Rotation3Dfwd.h
+    inc/SYCLMath/GenVector/Rotation3D.h
+    inc/SYCLMath/GenVector/RotationXfwd.h
+    inc/SYCLMath/GenVector/RotationX.h
+    inc/SYCLMath/GenVector/RotationYfwd.h
+    inc/SYCLMath/GenVector/RotationY.h
+    inc/SYCLMath/GenVector/RotationZfwd.h
+    inc/SYCLMath/GenVector/RotationZ.h
+    inc/SYCLMath/GenVector/RotationZYXfwd.h
+    inc/SYCLMath/GenVector/RotationZYX.h
+    inc/SYCLMath/GenVector/Transform3D.h
+    inc/SYCLMath/GenVector/Translation3D.h
+    inc/SYCLMath/GenVector/VectorUtil.h
+    inc/SYCLMath/LorentzRotation.h
+    inc/SYCLMath/LorentzVector.h
+    inc/SYCLMath/Plane3D.h
+    inc/SYCLMath/Point2Dfwd.h
+    inc/SYCLMath/Point2D.h
+    inc/SYCLMath/Point3Dfwd.h
+    inc/SYCLMath/Point3D.h
+    inc/SYCLMath/Polar2D.h
+    inc/SYCLMath/Polar3D.h
+    inc/SYCLMath/PositionVector2D.h
+    inc/SYCLMath/PositionVector3D.h
+    inc/SYCLMath/PtEtaPhiE4D.h
+    inc/SYCLMath/PtEtaPhiM4D.h
+    inc/SYCLMath/PxPyPzE4D.h
+    inc/SYCLMath/PxPyPzM4D.h
+    inc/SYCLMath/Quaternion.h
+    inc/SYCLMath/Rotation3D.h
+    inc/SYCLMath/RotationX.h
+    inc/SYCLMath/RotationY.h
+    inc/SYCLMath/RotationZ.h
+    inc/SYCLMath/RotationZYX.h
+    inc/SYCLMath/Transform3D.h
+    inc/SYCLMath/Translation3D.h
+    inc/SYCLMath/Vector2Dfwd.h
+    inc/SYCLMath/Vector2D.h
+    inc/SYCLMath/Vector3Dfwd.h
+    inc/SYCLMath/Vector3D.h
+    inc/SYCLMath/Vector4Dfwd.h
+    inc/SYCLMath/Vector4D.h
+    inc/SYCLMath/VectorUtil.h
 )
 
 set_target_properties(GenVectorX PROPERTIES LINKER_LANGUAGE CXX)
@@ -279,8 +279,8 @@ if (opensycl)
   #target_compile_options(GenVectorX INTERFACE -O2)
   #target_include_directories(GenVectorX INTERFACE ${OpenSYCL_INCLUDE_DIRS})
   #target_link_libraries(GenVectorX INTERFACE OpenSYCL::hipSYCL-rt)
-  #add_sycl_to_target(TARGET GenVectorX inc/Math/GenVector /MathUtil.h)
-  add_sycl_to_root_target(TARGET GenVectorX inc/Math/GenVector/MathUtil.h)
+  #add_sycl_to_target(TARGET GenVectorX inc/SYCLMath/GenVector /MathUtil.h)
+  add_sycl_to_root_target(TARGET GenVectorX inc/SYCLMath/GenVector/MathUtil.h)
 endif()
 
 install(TARGETS GenVectorX
@@ -290,16 +290,16 @@ install(TARGETS GenVectorX
 
 if (nocompile)
   ROOT_GENERATE_DICTIONARY(G__GenVector32
-      Math/Point2D.h
-      Math/Point3D.h
-      Math/Vector2D.h
-      Math/Vector3D.h
-      Math/Vector4D.h
+      SYCLMath/Point2D.h
+      SYCLMath/Point3D.h
+      SYCLMath/Vector2D.h
+      SYCLMath/Vector3D.h
+      SYCLMath/Vector4D.h
     MODULE
       GenVector
     MULTIDICT
     LINKDEF
-      Math/LinkDef_GenVector32.h
+      SYCLMath/LinkDef_GenVector32.h
     OPTIONS
       -writeEmptyRootPCM
     DEPENDENCIES
