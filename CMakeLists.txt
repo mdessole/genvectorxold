@@ -3,7 +3,6 @@ project(genvectorx)
 cmake_minimum_required(VERSION 3.9)
 
 
-
 if (oneapi)
    SET(_sycl_search_dirs ${SYCL_ROOT_DIR} /usr/lib /usr/local/lib /opt/intel/oneapi/compiler/latest/linux)
    find_program(SYCL_COMPILER
@@ -15,47 +14,65 @@ if (oneapi)
              HINTS ${_sycl_search_dirs}
              PATH_SUFFIXES include)
 
-   if (SYCL_COMPILER)
-     set(sycl ON)
+    if (sycl_targets)
+    set(SYCL_COMPILER_FLAGS "-fsycl -fsycl-unnamed-lambda -sycl-std=2020 -fPIC -fsycl-targets=${sycl_targets}  ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${_BUILD_TYPE_UPPER}}")   
+    else()
+    set(SYCL_COMPILER_FLAGS "-fsycl -fsycl-unnamed-lambda -sycl-std=2020 -fPIC ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${_BUILD_TYPE_UPPER}}") #-fsycl-targets=nvptx64-nvidia-cuda
+    endif()
+    message(STATUS "SYCL flags: ${SYCL_COMPILER_FLAGS}")
 
-     function(add_sycl_to_root_target)
-       CMAKE_PARSE_ARGUMENTS(ARG "" "TARGET" "SOURCES" ${ARGN})
-       get_target_property(_library_name ${ARG_TARGET} OUTPUT_NAME)
-       get_target_property(_deps ${ARG_TARGET} LINK_LIBRARIES)
+    if (SYCL_COMPILER)
+      set(sycl ON)
 
-       message(STATUS "Output library name: ${_library_name}")
-       target_include_directories(${ARG_TARGET} PUBLIC ${SYCL_INCLUDE_DIR} ${SYCL_INCLUDE_DIR}/sycl)
+    function(add_sycl_to_root_target)
+      CMAKE_PARSE_ARGUMENTS(ARG "" "TARGET" "SOURCES;HEADERS;DEPENDENCIES;INCLUDE_DIRECTORIES" ${ARGN})
+      
+      target_include_directories(${ARG_TARGET} PUBLIC ${SYCL_INCLUDE_DIR} ${SYCL_INCLUDE_DIR}/sycl)
+      target_link_directories(${ARG_TARGET} PUBLIC ${SYCL_LIB_DIR})
+      target_link_libraries(${ARG_TARGET} INTERFACE sycl)
 
-       # Get include directories for the SYCL target
-       get_target_property(_inc_dirs ${ARG_TARGET} INCLUDE_DIRECTORIES)
-       if (_inc_dirs)
-         foreach(dir ${_inc_dirs})
-           list(APPEND _inc_list -I${dir})
-         endforeach()
-         list(REMOVE_DUPLICATES _inc_list)
-       endif()
-       #list(APPEND _inc_list -I${SYCL_INCLUDE_DIR}/sycl)
-       #list(APPEND _inc_list -I${SYCL_INCLUDE_DIR}/sycl/CL)
-       message(STATUS "_inc_list: ${_inc_list}")
-       message(STATUS "SYCL_INCLUDE_DIR: ${SYCL_INCLUDE_DIR}")
+      # Get include directories for the SYCL target
+      set(_inc_dirs ${ARG_INCLUDE_DIRECTORIES})
+      if (_inc_dirs)
+        list(REMOVE_DUPLICATES _inc_dirs)
+        list(TRANSFORM _inc_dirs PREPEND -I)
+      endif()
 
-       # Compile the sycl source files with the found sycl compiler
-       set(SYCL_FLAGS "-fsycl -fsycl-unnamed-lambda -fsycl-device-only -Xclang ") #-fsycl-targets=nvptx64-nvidia-cuda
-       message(STATUS "SYCL flags: ${SYCL_FLAGS}")
-       separate_arguments(SYCL_FLAGS NATIVE_COMMAND ${SYCL_FLAGS})
-       foreach(src ${ARG_SOURCES})
-         set(_output_path ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${_library_name}.dir/${src}${CMAKE_CXX_OUTPUT_EXTENSION})
-         add_custom_command(OUTPUT ${_output_path}
-                            COMMAND ${SYCL_COMPILER} ${SYCL_FLAGS}  -c
-                            ${_inc_list}
-                            -o ${_output_path}
-                            ${CMAKE_CURRENT_SOURCE_DIR}/${src}
-                            DEPENDS ${_deps} ${ARG_TARGET}
+      # Compile the sycl source files with the found sycl compiler
+      separate_arguments(SYCL_COMPILER_FLAGS NATIVE_COMMAND ${SYCL_COMPILER_FLAGS})
+      foreach(src ${ARG_SOURCES})
+        set(_output_path ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${ARG_TARGET}.dir/${src}${CMAKE_CXX_OUTPUT_EXTENSION})
+        message(STATUS "_output_path ${_output_path}")
+        list(APPEND _outputs ${_output_path})
+
+        add_custom_command(OUTPUT ${_output_path}
+                            COMMAND ${SYCL_COMPILER} ${SYCL_COMPILER_FLAGS} -v -c
+                                    ${_inc_dirs}
+                                    -o ${_output_path}
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/${src}
+                            DEPENDS ${ARG_DEPENDENCIES}
                             COMMENT "Building SYCL object ${_output_path}"
-                            MAIN_DEPENDENCY ${src})
-        
-       endforeach()
-     endfunction()
+                            MAIN_DEPENDENCY ${src}
+                            )
+        endforeach()
+
+      set(SYCL_LINKER_FLAGS "-shared -fsycl -fsycl-unnamed-lambda ${_fsycl_targets} -fPIC ${CMAKE_CXX_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}")
+      separate_arguments(SYCL_LINKER_FLAGS NATIVE_COMMAND ${SYCL_LINKER_FLAGS})
+
+      foreach(lib ${ARG_DEPENDENCIES})
+        list(APPEND _lib_dep_paths "$<TARGET_FILE:${lib}>")
+      endforeach()
+
+      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${_outputs})
+      add_custom_command(TARGET ${ARG_TARGET}
+                          COMMAND ${SYCL_COMPILER} ${SYCL_LINKER_FLAGS}
+                                  -o $<TARGET_FILE:${ARG_TARGET}>
+                                  ${_outputs} ${_lib_dep_paths}
+                          DEPENDS ${ARG_DEPENDENCIES} ${_outputs} ${_sycl_target}
+                          COMMENT "Linking shared library ${ARG_TARGET}"
+                          MAIN_DEPENDENCY ${ARG_TARGET}
+                          )
+   endfunction()
 
      message(STATUS "Found Intel OneAPI SYCL: ${SYCL_INCLUDE_DIR}  (modify with: SYCL_ROOT_DIR)")
      message(STATUS "Using SYCL Host Compiler: ${SYCL_COMPILER}")
@@ -113,53 +130,8 @@ FORCE)
 endif()
 
 
-if (nocompile)
-  ROOT_LINKER_LIBRARY(GenVector
-      src/3DConversions.cxx
-      src/3DDistances.cxx
-      src/AxisAngle.cxx
-      src/AxisAngleXother.cxx
-      src/BitReproducible.cxx
-      src/Boost.cxx
-      src/BoostX.cxx
-      src/BoostY.cxx
-      src/BoostZ.cxx
-      src/EulerAngles.cxx
-      src/LorentzRotation.cxx
-      src/Quaternion.cxx
-      src/QuaternionXaxial.cxx
-      src/Rotation3D.cxx
-      src/Rotation3DxAxial.cxx
-      src/RotationZYX.cxx
-      src/VectorUtil.cxx
-    DEPENDENCIES
-      Core
-      MathCore
-  )
-
-  if (opensycl)
-    #set_target_properties(GenVector PROPERTIES LINKER_LANGUAGE CXX)
-    target_compile_definitions(GenVector INTERFACE CL_TARGET_OPENCL_VERSION=300)
-    target_compile_definitions(GenVector PUBLIC ROOT_MATH_SYCL)
-    target_compile_options(GenVector INTERFACE -O2)
-    target_include_directories(GenVector INTERFACE ${OpenSYCL_INCLUDE_DIRS})
-    target_link_libraries(GenVector INTERFACE OpenSYCL::hipSYCL-rt)
-    add_sycl_to_target(TARGET GenVector inc/SYCLMath/GenVector/MathUtil.h)
-  endif()
-
-  if (oneapi)
-    #set_target_properties(GenVector PROPERTIES LINKER_LANGUAGE CXX)
-    target_compile_definitions(GenVector INTERFACE CL_TARGET_OPENCL_VERSION=300)
-    target_compile_definitions(GenVector PUBLIC ROOT_MATH_SYCL)
-    target_compile_options(GenVector INTERFACE -O2)
-    target_include_directories(GenVector INTERFACE ${OpenSYCL_INCLUDE_DIRS})
-    target_link_libraries(GenVector INTERFACE OpenSYCL::hipSYCL-rt)
-    add_sycl_to_target(TARGET GenVector inc/SYCLMath/GenVector/MathUtil.h)
-  endif()
-endif()
-
 add_library(SYCLMath SHARED
-inc/SYCLMath/GenVector/MathUtil.h
+src/MathUtil.cxx
 )
 
 set_target_properties(SYCLMath PROPERTIES LINKER_LANGUAGE CXX)
@@ -167,14 +139,14 @@ set_target_properties(SYCLMath PROPERTIES LINKER_LANGUAGE CXX)
 if (opensycl)
     #set_target_properties(GenVector PROPERTIES LINKER_LANGUAGE CXX)
     target_compile_definitions(SYCLMath PUBLIC ROOT_MATH_SYCL)
-    add_sycl_to_target(TARGET SYCLMath inc/SYCLMath/GenVector/MathUtil.h)
+    add_sycl_to_root_target(TARGET SYCLMath HEADERS inc/SYCLMath/GenVector/MathUtil.h)
 endif()
 
-  if (oneapi)
+if (oneapi)
     #set_target_properties(GenVector PROPERTIES LINKER_LANGUAGE CXX)
     target_compile_definitions(SYCLMath PUBLIC ROOT_MATH_SYCL)
-    add_sycl_to_target(TARGET SYCLMath inc/SYCLMath/GenVector/MathUtil.h)
-  endif()
+    add_sycl_to_root_target(TARGET SYCLMath SOURCES src/MathUtil.cxx HEADERS inc/SYCLMath/GenVector/MathUtil.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc/)
+endif()
 
 
 
@@ -299,30 +271,6 @@ install(TARGETS GenVectorX SYCLMath
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
-
-if (nocompile)
-  ROOT_GENERATE_DICTIONARY(G__GenVector32
-      SYCLMath/Point2D.h
-      SYCLMath/Point3D.h
-      SYCLMath/Vector2D.h
-      SYCLMath/Vector3D.h
-      SYCLMath/Vector4D.h
-    MODULE
-      GenVector
-    MULTIDICT
-    LINKDEF
-      SYCLMath/LinkDef_GenVector32.h
-    OPTIONS
-      -writeEmptyRootPCM
-    DEPENDENCIES
-      Core
-      MathCore
-  )
-
-  ROOT_ADD_TEST_SUBDIRECTORY(test)
-
-  ROOT_INSTALL_HEADERS()
-endif()
 
 if (testing)
  add_subdirectory(testx)

@@ -2,15 +2,8 @@ if (oneapi)
   add_executable(CoordsOneAPI Coords.cpp)
   #target_link_libraries(CoordsOneAPI PUBLIC GenVectorX SYCLMath)
   #include_directories(../inc)
-  #target_compile_definitions(CoordsOneAPI PUBLIC ROOT_MATH_SYCL)
-  #add_sycl_to_root_target(TARGET CoordsOneAPI SOURCES Coords.cpp)
-  message (STATUS "SYCL_COMPILER ${SYCL_COMPILER}")
-  add_custom_command(OUTPUT CoordsOneAPI
-    COMMAND ${SYCL_COMPILER} Coords.cpp ${SYCL_FLAGS}
-    DEPENDS ${_deps}
-    COMMENT "Building SYCL object ${CoordsOneAPI}"
-    MAIN_DEPENDENCY Coords.cpp
-  )
+  target_compile_definitions(CoordsOneAPI PUBLIC ROOT_MATH_SYCL)
+  add_sycl_to_root_target(TARGET CoordsOneAPI SOURCES Coords.cpp DEPENDENCIES GenVectorX SYCLMath INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc)
   
 endif()
 
