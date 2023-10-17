@@ -1,15 +1,15 @@
 // @(#)root/mathcore:$Id$
 // Authors: W. Brown, M. Fischler, L. Moneta    2005
 
-#include "Math/GenVector/Rotation3D.h"
+#include "SYCLMath/GenVector/Rotation3D.h"
 
-#include "Math/GenVector/RotationX.h"
-#include "Math/GenVector/RotationY.h"
-#include "Math/GenVector/RotationZ.h"
+#include "SYCLMath/GenVector/RotationX.h"
+#include "SYCLMath/GenVector/RotationY.h"
+#include "SYCLMath/GenVector/RotationZ.h"
 
 namespace ROOT {
 
-namespace Math {
+namespace Experimental {
 
 Rotation3D Rotation3D::operator * (const RotationX  & rx) const {
    // combination of a Rotation3D with a RotationX
@@ -143,5 +143,5 @@ Rotation3D operator* (RotationZ const & rz, RotationY const & ry) {
 
 
 
-} //namespace Math
+} //namespace Experimental
 } //namespace ROOT

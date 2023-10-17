@@ -13,25 +13,26 @@
 //
 // Created by: Mark Fischler Mon Aug 8  2005
 //
+#include "SYCLMath/GenVector/MathUtil.h"
 
-#include "Math/GenVector/GenVectorIO.h"
+#include "SYCLMath/GenVector/GenVectorIO.h"
 
-#include "Math/GenVector/LorentzRotation.h"
-#include "Math/GenVector/LorentzVector.h"
-#include "Math/GenVector/PxPyPzE4D.h"
-#include "Math/GenVector/GenVector_exception.h"
+#include "SYCLMath/GenVector/LorentzRotation.h"
+#include "SYCLMath/GenVector/LorentzVector.h"
+#include "SYCLMath/GenVector/PxPyPzE4D.h"
+#include "SYCLMath/GenVector/GenVector_exception.h"
 
 #include <cmath>
 #include <algorithm>
 
-#include "Math/GenVector/Rotation3D.h"
-#include "Math/GenVector/RotationX.h"
-#include "Math/GenVector/RotationY.h"
-#include "Math/GenVector/RotationZ.h"
+#include "SYCLMath/GenVector/Rotation3D.h"
+#include "SYCLMath/GenVector/RotationX.h"
+#include "SYCLMath/GenVector/RotationY.h"
+#include "SYCLMath/GenVector/RotationZ.h"
 
 namespace ROOT {
 
-namespace Math {
+namespace Experimental {
 
 LorentzRotation::LorentzRotation() {
    // constructor of an identity LR
@@ -138,7 +139,7 @@ LorentzRotation::Rectify() {
                               "LorentzRotation:Rectify(): Non-timelike time row - cannot rectify");
       return;
    }
-   t /= std::sqrt(m2);
+   t /= mysqrt(m2);
    FourVector z ( fM[kZX], fM[kZY], fM[kZZ], fM[kZT] );
    z = z - z.Dot(t)*t;
    m2 = z.M2();
@@ -148,27 +149,27 @@ LorentzRotation::Rectify() {
                               "cannot rectify");
       return;
    }
-   z /= std::sqrt(-m2);
+   z /= mysqrt(-m2);
    FourVector y ( fM[kYX], fM[kYY], fM[kYZ], fM[kYT] );
    y = y - y.Dot(t)*t - y.Dot(z)*z;
    m2 = y.M2();
    if ( m2 >= 0 ) {
-      GenVector::Throw (
-                              "LorentzRotation:Rectify(): Non-spacelike Y row projection - "
-                              "cannot rectify");
+      //GenVector::Throw (
+      //                        "LorentzRotation:Rectify(): Non-spacelike Y row projection - "
+      //                        "cannot rectify");
       return;
    }
-   y /= std::sqrt(-m2);
+   y /= mysqrt(-m2);
    FourVector x ( fM[kXX], fM[kXY], fM[kXZ], fM[kXT] );
    x = x - x.Dot(t)*t - x.Dot(z)*z - x.Dot(y)*y;
    m2 = x.M2();
    if ( m2 >= 0 ) {
-      GenVector::Throw (
-                              "LorentzRotation:Rectify(): Non-spacelike X row projection - "
-                              "cannot rectify");
+      //GenVector::Throw (
+      //                        "LorentzRotation:Rectify(): Non-spacelike X row projection - "
+      //                        "cannot rectify");
       return;
    }
-   x /= std::sqrt(-m2);
+   x /= mysqrt(-m2);
 }
 
 
@@ -229,5 +230,5 @@ std::ostream & operator<< (std::ostream & os, const LorentzRotation & r) {
 }
 
 
-} //namespace Math
+} //namespace Experimental
 } //namespace ROOT

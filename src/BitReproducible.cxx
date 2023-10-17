@@ -1,14 +1,14 @@
 // @(#)root/mathcore:$Id$
 // Authors: W. Brown, M. Fischler, L. Moneta    2005
 
-#include "Math/GenVector/BitReproducible.h"
+#include "SYCLMath/GenVector/BitReproducible.h"
 
 #include <sstream>
 #include <iomanip>
 #include <exception>
 
 namespace ROOT {
-namespace Math {
+namespace Experimental {
 namespace GenVector_detail {
 
 bool BitReproducible::fgByte_order_known = false;
@@ -126,5 +126,5 @@ double BitReproducible::Longs2double (unsigned int i, unsigned int j) {
 }
 
 }  // namespace _GenVector_detail
-}  // namespace Math
+}  // namespace Experimental
 }  // namespace ROOT

@@ -14,23 +14,23 @@
 //
 // Last update: $Id$
 //
-#include "Math/GenVector/RotationZYX.h"
+#include "SYCLMath/GenVector/RotationZYX.h"
 
 #include <cmath>
 
-#include "Math/GenVector/Cartesian3D.h"
-#include "Math/GenVector/DisplacementVector3D.h"
-#include "Math/GenVector/Rotation3D.h"
-#include "Math/GenVector/Quaternion.h"
-#include "Math/GenVector/RotationX.h"
-#include "Math/GenVector/RotationY.h"
-#include "Math/GenVector/RotationZ.h"
+#include "SYCLMath/GenVector/Cartesian3D.h"
+#include "SYCLMath/GenVector/DisplacementVector3D.h"
+#include "SYCLMath/GenVector/Rotation3D.h"
+#include "SYCLMath/GenVector/Quaternion.h"
+#include "SYCLMath/GenVector/RotationX.h"
+#include "SYCLMath/GenVector/RotationY.h"
+#include "SYCLMath/GenVector/RotationZ.h"
 
-#include "Math/GenVector/AxisAnglefwd.h"
+#include "SYCLMath/GenVector/AxisAnglefwd.h"
 
 namespace ROOT {
 
-namespace Math {
+namespace Experimental {
 
 // ========== Constructors and Assignment =====================
 
@@ -87,7 +87,7 @@ RotationZYX RotationZYX::operator * (const RotationZ  & r) const {
    //         the r.Angle() to phi.
    Scalar newPhi = fPhi + r.Angle();
    if ( newPhi <= -Pi()|| newPhi > Pi() ) {
-      newPhi = newPhi - std::floor( newPhi/(2*Pi()) +.5 ) * 2*Pi();
+      newPhi = newPhi - myfloor( newPhi/(2*Pi()) +.5 ) * 2*Pi();
    }
    return RotationZYX ( newPhi, fTheta, fPsi );
 }
@@ -113,7 +113,7 @@ void RotationZYX::Rectify()
 
    Scalar theta2 = fTheta + M_PI_2;
    if ( theta2 < 0 || theta2 > Pi() ) {
-      Scalar t = theta2 - std::floor( theta2/(2*Pi() ) ) * 2*Pi();
+      Scalar t = theta2 - myfloor( theta2/(2*Pi() ) ) * 2*Pi();
       if ( t <= Pi() ) {
          theta2 = t;
       } else {
@@ -126,11 +126,11 @@ void RotationZYX::Rectify()
    }
 
    if ( fPhi <= -Pi()|| fPhi > Pi() ) {
-      fPhi = fPhi - std::floor( fPhi/(2*Pi()) +.5 ) * 2*Pi();
+      fPhi = fPhi - myfloor( fPhi/(2*Pi()) +.5 ) * 2*Pi();
    }
 
    if ( fPsi <= -Pi()|| fPsi > Pi() ) {
-      fPsi = fPsi - std::floor( fPsi/(2*Pi()) +.5 ) * 2*Pi();
+      fPsi = fPsi - myfloor( fPsi/(2*Pi()) +.5 ) * 2*Pi();
    }
 
 } // Rectify()
@@ -156,5 +156,5 @@ std::ostream & operator<< (std::ostream & os, const RotationZYX & e) {
 }
 
 
-} //namespace Math
+} //namespace Experimental
 } //namespace ROOT

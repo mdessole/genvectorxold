@@ -14,20 +14,21 @@
 //
 // Last update: $Id$
 //
-#include "Math/GenVector/Quaternion.h"
+#include "SYCLMath/GenVector/MathUtil.h"
+#include "SYCLMath/GenVector/Quaternion.h"
 
 #include <cmath>
 
-#include "Math/GenVector/Cartesian3D.h"
-#include "Math/GenVector/DisplacementVector3D.h"
+#include "SYCLMath/GenVector/Cartesian3D.h"
+#include "SYCLMath/GenVector/DisplacementVector3D.h"
 
-#include "Math/GenVector/Rotation3Dfwd.h"
-#include "Math/GenVector/AxisAnglefwd.h"
-#include "Math/GenVector/EulerAnglesfwd.h"
+#include "SYCLMath/GenVector/Rotation3Dfwd.h"
+#include "SYCLMath/GenVector/AxisAnglefwd.h"
+#include "SYCLMath/GenVector/EulerAnglesfwd.h"
 
 namespace ROOT {
 
-namespace Math {
+namespace Experimental {
 
 // ========== Constructors and Assignment =====================
 
@@ -42,7 +43,7 @@ void Quaternion::Rectify()
       fU = - fU; fI = - fI; fJ = - fJ; fK = - fK;
    }
 
-   Scalar a = 1.0 / std::sqrt(fU*fU + fI*fI + fJ*fJ + fK*fK);
+   Scalar a = 1.0 / mysqrt(fU*fU + fI*fI + fJ*fJ + fK*fK);
    fU *= a;
    fI *= a;
    fJ *= a;
@@ -106,5 +107,5 @@ std::ostream & operator<< (std::ostream & os, const Quaternion & q) {
 }
 
 
-} //namespace Math
+} //namespace Experimental
 } //namespace ROOT

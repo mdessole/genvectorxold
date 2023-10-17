@@ -12,17 +12,18 @@
 //
 // Created by: Mark Fischler Tues July 5 2005
 //
-#include "Math/GenVector/Rotation3D.h"
+#include "SYCLMath/GenVector/MathUtil.h"
+#include "SYCLMath/GenVector/Rotation3D.h"
 
 #include <cmath>
 #include <algorithm>
 
-#include "Math/GenVector/Cartesian3D.h"
-#include "Math/GenVector/DisplacementVector3D.h"
+#include "SYCLMath/GenVector/Cartesian3D.h"
+#include "SYCLMath/GenVector/DisplacementVector3D.h"
 
 namespace ROOT {
 
-namespace Math {
+namespace Experimental {
 
 // ========== Constructors and Assignment =====================
 
@@ -54,12 +55,12 @@ void Rotation3D::Rectify()
 
    // Step 2 -- find lower-triangular U such that U * U.transpose = M
 
-   double u11 = std::sqrt(m11);
+   double u11 = mysqrt(m11);
    double u21 = m12/u11;
    double u31 = m13/u11;
-   double u22 = std::sqrt(m22-u21*u21);
+   double u22 = mysqrt(m22-u21*u21);
    double u32 = (m23-m12*m13/m11)/u22;
-   double u33 = std::sqrt(m33 - u31*u31 - u32*u32);
+   double u33 = mysqrt(m33 - u31*u31 - u32*u32);
 
 
    // Step 3 -- find V such that V*V = U.  U is also lower-triangular
@@ -145,5 +146,5 @@ std::ostream & operator<< (std::ostream & os, const Rotation3D & r) {
    return os;
 }
 
-} //namespace Math
+} //namespace Experimental
 } //namespace ROOT

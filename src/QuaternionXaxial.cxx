@@ -15,11 +15,11 @@
 //
 // Last update: $Id$
 //
-#include "Math/GenVector/Quaternion.h"
+#include "SYCLMath/GenVector/Quaternion.h"
 
 namespace ROOT {
 
-namespace Math {
+namespace Experimental {
 
 
 // Although the same technique would work with axial rotations,
@@ -75,5 +75,5 @@ operator * ( RotationZ const & r, Quaternion const & q ) {
 }
 
 
-} //namespace Math
+} //namespace Experimental
 } //namespace ROOT

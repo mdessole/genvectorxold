@@ -12,11 +12,11 @@
 //
 // Created by: Lorenzo Moneta 22 Aug 2006
 //
-#include "Math/GenVector/VectorUtil.h"
+#include "SYCLMath/GenVector/VectorUtil.h"
 
 namespace ROOT {
 
-namespace Math {
+namespace Experimental {
 
 
 double VectorUtil::Phi_0_2pi(double angle) {
@@ -50,5 +50,5 @@ double VectorUtil::Phi_mpi_pi(double angle) {
 
 
 
-} //namespace Math
+} //namespace Experimental namespace Experimental
 } //namespace ROOT

@@ -1,0 +1,22 @@
+// @(#)root/mathcore:$Id$
+// Authors: W. Brown, M. Fischler, L. Moneta    2005
+
+#ifndef ROOT_Experimental_GenVector_EulerAnglesfwd
+#define ROOT_Experimental_GenVector_EulerAnglesfwd  1
+
+
+namespace ROOT {
+
+  namespace Experimental {
+
+  /**
+      Class describing a rotation represented
+      by Euler angles phi, theta, psi
+   */
+
+class EulerAngles;
+
+}  // namespace Experimental
+}  // namespace ROOT
+
+#endif  // ROOT_Experimental_GenVector_EulerAnglesfwd

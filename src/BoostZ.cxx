@@ -13,19 +13,20 @@
 //
 // Created by: Mark Fischler Mon Nov 1  2005
 //
-#include "Math/GenVector/BoostZ.h"
-#include "Math/GenVector/LorentzVector.h"
-#include "Math/GenVector/PxPyPzE4D.h"
-#include "Math/GenVector/DisplacementVector3D.h"
-#include "Math/GenVector/Cartesian3D.h"
-#include "Math/GenVector/GenVector_exception.h"
+#include "SYCLMath/GenVector/MathUtil.h"
+#include "SYCLMath/GenVector/BoostZ.h"
+#include "SYCLMath/GenVector/LorentzVector.h"
+#include "SYCLMath/GenVector/PxPyPzE4D.h"
+#include "SYCLMath/GenVector/DisplacementVector3D.h"
+#include "SYCLMath/GenVector/Cartesian3D.h"
+#include "SYCLMath/GenVector/GenVector_exception.h"
 
 #include <cmath>
 #include <algorithm>
 
 namespace ROOT {
 
-namespace Math {
+namespace Experimental {
 
 BoostZ::BoostZ() : fBeta(0.0), fGamma(1.0) {}
 
@@ -33,12 +34,12 @@ void BoostZ::SetComponents (Scalar bz) {
    // set component
    Scalar bp2 = bz*bz;
    if (bp2 >= 1) {
-      GenVector::Throw (
-                              "Beta Vector supplied to set BoostZ represents speed >= c");
+      //GenVector::Throw (
+      //                        "Beta Vector supplied to set BoostZ represents speed >= c");
       return;
    }
    fBeta = bz;
-   fGamma = 1.0 / std::sqrt(1.0 - bp2);
+   fGamma = 1.0 / mysqrt(1.0 - bp2);
 }
 
 void BoostZ::GetComponents (Scalar& bz) const {
@@ -68,8 +69,8 @@ void BoostZ::Rectify() {
    // again.
 
    if (fGamma <= 0) {
-      GenVector::Throw (
-                              "Attempt to rectify a boost with non-positive gamma");
+      //GenVector::Throw (
+      //                        "Attempt to rectify a boost with non-positive gamma");
       return;
    }
    Scalar beta = fBeta;
@@ -110,5 +111,5 @@ std::ostream & operator<< (std::ostream & os, const BoostZ & b) {
    return os;
 }
 
-} //namespace Math
+} //namespace Experimental
 } //namespace ROOT

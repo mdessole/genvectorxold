@@ -13,18 +13,18 @@
 //
 // Created by: Mark Fischler Tues July 5  2005
 //
-#include "Math/GenVector/AxisAngle.h"
+#include "SYCLMath/GenVector/AxisAngle.h"
 
 #include <cmath>
 #include <algorithm>
 
-#include "Math/GenVector/Cartesian3D.h"
-#include "Math/GenVector/DisplacementVector3D.h"
-#include "Math/GenVector/Rotation3D.h"
+#include "SYCLMath/GenVector/Cartesian3D.h"
+#include "SYCLMath/GenVector/DisplacementVector3D.h"
+#include "SYCLMath/GenVector/Rotation3D.h"
 
 namespace ROOT {
 
-namespace Math {
+namespace Experimental {
 
 // ========== Constructors and Assignment =====================
 
@@ -75,8 +75,8 @@ DisplacementVector3D< Cartesian3D<double> >
 AxisAngle::
 operator() (const XYZVector & v) const
 {
-   Scalar c = std::cos(fAngle);
-   Scalar s = std::sin(fAngle);
+   Scalar c = mycos(fAngle);
+   Scalar s = mysin(fAngle);
    Scalar p = fAxis.Dot(v) * ( 1 - c );
    return  DisplacementVector3D< Cartesian3D<double> >
       (
@@ -97,5 +97,5 @@ std::ostream & operator<< (std::ostream & os, const AxisAngle & a) {
 
 
 
-} //namespace Math
+} //namespace Experimental
 } //namespace ROOT

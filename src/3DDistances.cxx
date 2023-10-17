@@ -16,22 +16,22 @@
 //
 
 
-#include "Math/GenVector/3DDistances.h"
+#include "SYCLMath/GenVector/3DDistances.h"
 
-#include "Math/GenVector/Rotation3D.h"
-#include "Math/GenVector/AxisAngle.h"
-#include "Math/GenVector/EulerAngles.h"
-#include "Math/GenVector/Quaternion.h"
-#include "Math/GenVector/RotationZYX.h"
-#include "Math/GenVector/RotationX.h"
-#include "Math/GenVector/RotationY.h"
-#include "Math/GenVector/RotationZ.h"
+#include "SYCLMath/GenVector/Rotation3D.h"
+#include "SYCLMath/GenVector/AxisAngle.h"
+#include "SYCLMath/GenVector/EulerAngles.h"
+#include "SYCLMath/GenVector/Quaternion.h"
+#include "SYCLMath/GenVector/RotationZYX.h"
+#include "SYCLMath/GenVector/RotationX.h"
+#include "SYCLMath/GenVector/RotationY.h"
+#include "SYCLMath/GenVector/RotationZ.h"
 
 #include <cmath>
 
 
 namespace ROOT {
-namespace Math {
+namespace Experimental {
 namespace gv_detail {
 
 
@@ -339,5 +339,5 @@ double dist( RotationZ const & from, RotationZ const & to)
 
 
 } //namespace gv_detail
-} //namespace Math
+} //namespace Experimental
 } //namespace ROOT
