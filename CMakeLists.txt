@@ -14,6 +14,10 @@ if (oneapi)
              NAMES sycl/sycl.hpp
              HINTS ${_sycl_search_dirs}
              PATH_SUFFIXES include)
+    find_path(SYCL_LIB_DIR
+             NAMES libsycl.so
+             HINTS ${_sycl_search_dirs}
+             PATH_SUFFIXES lib)
 
     if (sycl_targets)
     set(SYCL_COMPILER_FLAGS "-fsycl -fsycl-unnamed-lambda -sycl-std=2020 -fPIC -fsycl-targets=${sycl_targets}  ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${_BUILD_TYPE_UPPER}}")   
@@ -21,17 +25,58 @@ if (oneapi)
     set(SYCL_COMPILER_FLAGS "-fsycl -fsycl-unnamed-lambda -sycl-std=2020 -fPIC ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${_BUILD_TYPE_UPPER}}") #-fsycl-targets=nvptx64-nvidia-cuda
     endif()
     message(STATUS "SYCL flags: ${SYCL_COMPILER_FLAGS}")
+    message(STATUS "SYCL_COMPILER: ${SYCL_COMPILER}")
+    message(STATUS "SYCL_INCLUDE_DIR: ${SYCL_INCLUDE_DIR}")
+    message(STATUS "SYCL_LIB_DIR: ${SYCL_LIB_DIR}")
 
     if (SYCL_COMPILER)
       set(sycl ON)
 
-    function(add_sycl_to_root_target)
+    function(add_sycl_to_root_target_exe)
       CMAKE_PARSE_ARGUMENTS(ARG "" "TARGET" "SOURCES;HEADERS;DEPENDENCIES;INCLUDE_DIRECTORIES;COMPILE_DEFINITIONS" ${ARGN})
-      
+      # Get include directories for the SYCL target
+      set(_inc_dirs ${ARG_INCLUDE_DIRECTORIES})
+      if (_inc_dirs)
+        list(REMOVE_DUPLICATES _inc_dirs)
+        list(TRANSFORM _inc_dirs PREPEND -I)
+      endif()
+
+      # Compile the sycl source files with the found sycl compiler
+      separate_arguments(SYCL_COMPILER_FLAGS NATIVE_COMMAND ${SYCL_COMPILER_FLAGS})
+      foreach(src ${ARG_SOURCES})
+        set(_output_path ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${ARG_TARGET}.dir/${src}${CMAKE_CXX_OUTPUT_EXTENSION})
+        list(APPEND _outputs ${_output_path})
+
+        add_custom_command(OUTPUT ${_output_path}
+                            COMMAND ${SYCL_COMPILER}  ${SYCL_COMPILER_FLAGS} -c
+                                    ${_inc_dirs} -D${ARG_COMPILE_DEFINITIONS}
+                                    -o ${_output_path}
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/${src}
+                            DEPENDS ${ARG_DEPENDENCIES}
+                            COMMENT "Building SYCL object ${_output_path}"
+                            MAIN_DEPENDENCY ${src}
+                            )
+      endforeach()
+
+      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${_outputs})               
+      set_property(TARGET ${ARG_TARGET} PROPERTY SOURCES ${_outputs})               
       target_include_directories(${ARG_TARGET} PUBLIC ${SYCL_INCLUDE_DIR} ${SYCL_INCLUDE_DIR}/sycl)
       target_link_directories(${ARG_TARGET} PUBLIC ${SYCL_LIB_DIR})
       target_link_libraries(${ARG_TARGET} INTERFACE sycl)
-      target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
+      #target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
+      add_custom_command(TARGET ${ARG_TARGET}
+                            COMMAND ${SYCL_COMPILER}  ${SYCL_COMPILER_FLAGS}
+                                    ${_inc_dirs} -D${ARG_COMPILE_DEFINITIONS} -L${SYCL_LIB_DIR} -lsycl
+                                    -o ${ARG_TARGET} ${_outputs} 
+                            DEPENDS ${ARG_DEPENDENCIES}
+                            COMMENT "Building SYCL executable ${ARG_TARGET}"
+                            MAIN_DEPENDENCY ${ARG_TARGET}
+                            )
+    
+    endfunction()
+
+    function(add_sycl_to_root_target)
+      CMAKE_PARSE_ARGUMENTS(ARG "" "TARGET" "SOURCES;HEADERS;DEPENDENCIES;INCLUDE_DIRECTORIES;COMPILE_DEFINITIONS" ${ARGN})
 
       # Get include directories for the SYCL target
       set(_inc_dirs ${ARG_INCLUDE_DIRECTORIES})
@@ -44,20 +89,18 @@ if (oneapi)
       separate_arguments(SYCL_COMPILER_FLAGS NATIVE_COMMAND ${SYCL_COMPILER_FLAGS})
       foreach(src ${ARG_SOURCES})
         set(_output_path ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${ARG_TARGET}.dir/${src}${CMAKE_CXX_OUTPUT_EXTENSION})
-        message(STATUS "_output_path ${_output_path}")
         list(APPEND _outputs ${_output_path})
-        message(STATUS "_outputs ${_outputs}")
 
         add_custom_command(OUTPUT ${_output_path}
-                            COMMAND ${SYCL_COMPILER} ${SYCL_COMPILER_FLAGS} -c
-                                    ${_inc_dirs}
+                            COMMAND ${SYCL_COMPILER}  ${SYCL_COMPILER_FLAGS} -c
+                                    ${_inc_dirs} -D${ARG_COMPILE_DEFINITIONS}
                                     -o ${_output_path}
                                     ${CMAKE_CURRENT_SOURCE_DIR}/${src}
                             DEPENDS ${ARG_DEPENDENCIES}
                             COMMENT "Building SYCL object ${_output_path}"
                             MAIN_DEPENDENCY ${src}
                             )
-        endforeach()
+      endforeach()
 
       set(SYCL_LINKER_FLAGS "-shared -fsycl -fsycl-unnamed-lambda ${_fsycl_targets} -fPIC ${CMAKE_CXX_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}")
       separate_arguments(SYCL_LINKER_FLAGS NATIVE_COMMAND ${SYCL_LINKER_FLAGS})
@@ -66,16 +109,29 @@ if (oneapi)
         list(APPEND _lib_dep_paths "$<TARGET_FILE:${lib}>")
       endforeach()
 
-      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${_outputs})
-      add_custom_command(TARGET ${ARG_TARGET}
-                          COMMAND ${SYCL_COMPILER} ${SYCL_LINKER_FLAGS}
+      list(APPEND _inc_dirs ${SYCL_INCLUDE_DIR})
+      list(APPEND _inc_dirs ${SYCL_INCLUDE_DIR}/sycl)
+      
+      add_custom_command(OUTPUT ${ARG_TARGET}
+                          COMMAND ${SYCL_COMPILER}  ${SYCL_LINKER_FLAGS}
                                   -o $<TARGET_FILE:${ARG_TARGET}>
-                                  ${_outputs} ${_lib_dep_paths}
+                                  ${_outputs} ${_lib_dep_paths} ${_inc_dirs}
+                                  -D${ARG_COMPILE_DEFINITIONS}
                           DEPENDS ${ARG_DEPENDENCIES} ${_outputs} ${_sycl_target}
                           COMMENT "Linking shared library ${ARG_TARGET}"
-                          MAIN_DEPENDENCY ${ARG_TARGET}
+                          MAIN_DEPENDENCY ${_outputs}
                           )
+
+      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${_outputs})
+      set_property(TARGET ${ARG_TARGET} PROPERTY SOURCES ${_outputs})  
+      set_target_properties(${ARG_TARGET} PROPERTIES LINKER_LANGUAGE CXX)
+      target_include_directories(${ARG_TARGET} PUBLIC ${SYCL_INCLUDE_DIR} ${SYCL_INCLUDE_DIR}/sycl)
+      target_link_directories(${ARG_TARGET} PUBLIC ${SYCL_LIB_DIR})
+      target_link_libraries(${ARG_TARGET} INTERFACE sycl)
+      #target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
+
    endfunction()
+
 
      message(STATUS "Found Intel OneAPI SYCL: ${SYCL_INCLUDE_DIR}  (modify with: SYCL_ROOT_DIR)")
      message(STATUS "Using SYCL Host Compiler: ${SYCL_COMPILER}")
