@@ -2,6 +2,7 @@ project(genvectorx)
 
 cmake_minimum_required(VERSION 3.9)
 
+include_directories(${CMAKE_SOURCE_DIR}/inc)
 
 if (oneapi)
    SET(_sycl_search_dirs ${SYCL_ROOT_DIR} /usr/lib /usr/local/lib /opt/intel/oneapi/compiler/latest/linux)
@@ -25,11 +26,12 @@ if (oneapi)
       set(sycl ON)
 
     function(add_sycl_to_root_target)
-      CMAKE_PARSE_ARGUMENTS(ARG "" "TARGET" "SOURCES;HEADERS;DEPENDENCIES;INCLUDE_DIRECTORIES" ${ARGN})
+      CMAKE_PARSE_ARGUMENTS(ARG "" "TARGET" "SOURCES;HEADERS;DEPENDENCIES;INCLUDE_DIRECTORIES;COMPILE_DEFINITIONS" ${ARGN})
       
       target_include_directories(${ARG_TARGET} PUBLIC ${SYCL_INCLUDE_DIR} ${SYCL_INCLUDE_DIR}/sycl)
       target_link_directories(${ARG_TARGET} PUBLIC ${SYCL_LIB_DIR})
       target_link_libraries(${ARG_TARGET} INTERFACE sycl)
+      target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
 
       # Get include directories for the SYCL target
       set(_inc_dirs ${ARG_INCLUDE_DIRECTORIES})
@@ -44,9 +46,10 @@ if (oneapi)
         set(_output_path ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${ARG_TARGET}.dir/${src}${CMAKE_CXX_OUTPUT_EXTENSION})
         message(STATUS "_output_path ${_output_path}")
         list(APPEND _outputs ${_output_path})
+        message(STATUS "_outputs ${_outputs}")
 
         add_custom_command(OUTPUT ${_output_path}
-                            COMMAND ${SYCL_COMPILER} ${SYCL_COMPILER_FLAGS} -v -c
+                            COMMAND ${SYCL_COMPILER} ${SYCL_COMPILER_FLAGS} -c
                                     ${_inc_dirs}
                                     -o ${_output_path}
                                     ${CMAKE_CURRENT_SOURCE_DIR}/${src}
@@ -96,10 +99,16 @@ if (opensycl)
     if (OpenSYCL_FOUND)
       set(sycl ON)
       function(add_sycl_to_root_target)
-        CMAKE_PARSE_ARGUMENTS(ARG "" "TARGET" "SOURCES" ${ARGN})
-        add_sycl_to_target(TARGET ${ARG_TARGET}  SOURCES ${ARG_SOURCES})
+        CMAKE_PARSE_ARGUMENTS(ARG "" "TARGET" "SOURCES;HEADERS;DEPENDENCIES;INCLUDE_DIRECTORIES;COMPILE_DEFINITIONS" ${ARGN})
+        target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
+        target_link_libraries(${ARG_TARGET} PUBLIC ${ARG_DEPENDENCIES})
         target_include_directories(${ARG_TARGET} INTERFACE ${OpenSYCL_INCLUDE_DIRS})
         target_link_libraries(${ARG_TARGET} INTERFACE OpenSYCL::hipSYCL-rt)
+        add_sycl_to_target(TARGET ${ARG_TARGET}  SOURCES ${ARG_SOURCES})
+        message(STATUS "ARG_SOURCES ${ARG_SOURCES}")
+        message(STATUS "ARG_DEPENDENCIES ${ARG_DEPENDENCIES}")
+        message(STATUS "ARG_COMPILE_DEFINITIONS ${ARG_COMPILE_DEFINITIONS}")
+        message(STATUS "ARG_INCLUDE_DIRECTORIES ${ARG_INCLUDE_DIRECTORIES}")
       endfunction()
       message(STATUS "OpenSYCL sycl enabled")
     else()
