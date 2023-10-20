@@ -12,6 +12,8 @@
 #include <sycl/sycl.hpp>
 #endif
 
+#include "gtest/gtest.h"
+
 /*
 // Helper function for toggling ON SYCL histogramming.
 char env[] = "SYCL_HIST";
