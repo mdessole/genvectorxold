@@ -47,9 +47,7 @@ Vector<arithmetic_type> InvariantMass(const Vector<vec4d> v1, const size_t N,
 
   Vector<arithmetic_type> invMasses(N);
 
-#ifdef COLLECT_TIMING
   auto start = std::chrono::system_clock::now();
-#endif
 
   std::cout << "sycl::queue check - selected device:\n"
             << queue.get_device().get_info<sycl::info::device::name>()
@@ -84,14 +82,13 @@ Vector<arithmetic_type> InvariantMass(const Vector<vec4d> v1, const size_t N,
     });
   } // end of scope, ensures data copied back to host
   queue.wait();
-#ifdef COLLECT_TIMING
+
   auto end = std::chrono::system_clock::now();
   auto duration =
       std::chrono::duration_cast<std::chrono::microseconds>(end - start)
           .count() *
       1e-6;
   std::cout << "sycl time " << duration << " (s)" << std::endl;
-#endif
 
   return invMasses;
 }
@@ -103,9 +100,7 @@ Vector<arithmetic_type> InvariantMasses(const Vector<vec4d> v1,
 
   Vector<arithmetic_type> invMasses(N);
 
-#ifdef COLLECT_TIMING
   auto start = std::chrono::system_clock::now();
-#endif
 
   std::cout << "sycl::queue check - selected device:\n"
             << queue.get_device().get_info<sycl::info::device::name>()
@@ -143,14 +138,13 @@ Vector<arithmetic_type> InvariantMasses(const Vector<vec4d> v1,
     });
   } // end of scope, ensures data copied back to host
   queue.wait();
-#ifdef COLLECT_TIMING
+
   auto end = std::chrono::system_clock::now();
   auto duration =
       std::chrono::duration_cast<std::chrono::microseconds>(end - start)
           .count() *
       1e-6;
   std::cout << "sycl time " << duration << " (s)" << std::endl;
-#endif
 
   return invMasses;
 }

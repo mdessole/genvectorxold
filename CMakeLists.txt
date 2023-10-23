@@ -50,8 +50,12 @@ if (oneapi)
         list(REMOVE_DUPLICATES _inc_dirs)
         list(TRANSFORM _inc_dirs PREPEND -I)
       endif()
-
-      message(STATUS "ARG_COMPILE_DEFINITIONS ${ARG_COMPILE_DEFINITIONS}")
+      
+      foreach(comp_def ${ARG_COMPILE_DEFINITIONS})
+        list(APPEND _COMPILE_DEFINITIONS -D${comp_def})
+      endforeach()
+      list(JOIN _COMPILE_DEFINITIONS " " _COMPILE_DEFINITIONS)
+      message(STATUS "_COMPILE_DEFINITIONS ${_COMPILE_DEFINITIONS}")
 
       # Compile the sycl source files with the found sycl compiler
       separate_arguments(SYCL_COMPILER_FLAGS NATIVE_COMMAND ${SYCL_COMPILER_FLAGS})
@@ -62,7 +66,7 @@ if (oneapi)
 
         add_custom_command(OUTPUT ${_output_path}
                             COMMAND ${SYCL_COMPILER}  ${SYCL_COMPILER_FLAGS} -c
-                                    ${_inc_dirs} -D${ARG_COMPILE_DEFINITIONS}
+                                    ${_inc_dirs} ${_COMPILE_DEFINITIONS}
                                     -o ${_output_path}
                                     ${CMAKE_CURRENT_SOURCE_DIR}/${src}
                             DEPENDS ${ARG_DEPENDENCIES}
@@ -79,7 +83,7 @@ if (oneapi)
       #target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
       add_custom_command(TARGET ${ARG_TARGET}
                             COMMAND ${SYCL_COMPILER}  ${SYCL_COMPILER_FLAGS}
-                                    ${_inc_dirs} -D${ARG_COMPILE_DEFINITIONS} -L${SYCL_LIB_DIR} -lsycl
+                                    ${_inc_dirs} ${_COMPILE_DEFINITIONS} -L${SYCL_LIB_DIR} -lsycl
                                     -o ${ARG_TARGET} ${_outputs} 
                             DEPENDS ${ARG_DEPENDENCIES}
                             COMMENT "Building SYCL executable ${ARG_TARGET}"
