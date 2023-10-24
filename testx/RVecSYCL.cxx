@@ -176,6 +176,6 @@ int main(int argc, char **argv) {
   Vector<arithmetic_type> masses =
       InvariantMasses(u_vectors, v_vectors, N, local_size, queue);
 
-  // std::cout << masses[0]<< std::endl;
+  assert((std::abs(masses[0] - (-2.3504)) <= 1e-5));
   return 0;
 }
