@@ -1,5 +1,5 @@
 #include "ROOT/RVec.hxx"
-#include "Math/PtEtaPhiE4D.h"
+#include "Math/PtEtaPhiM4D.h"
 #include "Math/Vector4D.h"
 #include <assert.h>
 #include <chrono>
@@ -7,7 +7,7 @@
 
 using arithmetic_type = double;
 using vec4d =
-    ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiE4D<arithmetic_type>>;
+    ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<arithmetic_type>>;
 
 template <class T> using Vector = ROOT::RVec<T>;
 
@@ -29,7 +29,7 @@ Vector<arithmetic_type> InvariantMasses(const Vector<vec4d> v1,
       std::chrono::duration_cast<std::chrono::microseconds>(end - start)
           .count() *
       1e-6;
-  std::cout << "sycl time " << duration << " (s)" << std::endl;
+  // std::cout << "cpu time " << duration << " (s)" << std::endl;
 
   return invMasses;
 }
@@ -61,11 +61,20 @@ int main(int argc, char **argv) {
 
   Vector<arithmetic_type> masses =
       InvariantMasses(u_vectors, v_vectors, N, local_size);
+  auto start = std::chrono::system_clock::now();
 
-  Vector<arithmetic_type> masses2 = ROOT::VecOps::InvariantMasses(pt1, eta1, phi1, mass1, pt2,
-                                               eta2, phi2, mass2);
+  Vector<arithmetic_type> masses2 = ROOT::VecOps::InvariantMasses(
+      pt1, eta1, phi1, mass1, pt2, eta2, phi2, mass2);
 
-  assert((std::abs(masses[0] - (-2.3504)) <= 1e-5));
-  std::cout << masses2[0] << std::endl;
+  auto end = std::chrono::system_clock::now();
+  auto duration =
+      std::chrono::duration_cast<std::chrono::microseconds>(end - start)
+          .count() *
+      1e-6;
+  std::cout << "RVec cpu time " << duration << " (s)" << std::endl;
+
+  assert((std::abs(masses[0] - 2.) <= 1e-5));
+  assert((std::abs(masses2[0] - 2.) <= 1e-5));
+
   return 0;
 }

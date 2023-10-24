@@ -4,7 +4,7 @@
 
 using arithmetic_type = double;
 using vec4d = ROOT::Experimental::LorentzVector<
-    ROOT::Experimental::PtEtaPhiE4D<arithmetic_type>>;
+    ROOT::Experimental::PtEtaPhiM4D<arithmetic_type>>;
 template <class T> using Vector = std::vector<T>;
 
 #ifndef RVecSYCL_H
@@ -176,6 +176,6 @@ int main(int argc, char **argv) {
   Vector<arithmetic_type> masses =
       InvariantMasses(u_vectors, v_vectors, N, local_size, queue);
 
-  assert((std::abs(masses[0] - (-2.3504)) <= 1e-5));
+  assert((std::abs(masses[0] - 2.) <= 1e-5));
   return 0;
 }
