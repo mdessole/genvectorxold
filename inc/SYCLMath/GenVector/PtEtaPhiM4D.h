@@ -59,12 +59,12 @@ public :
    /**
       Default constructor gives zero 4-vector (with zero mass)
    */
-   PtEtaPhiM4D() : fPt(0), fEta(0), fPhi(0), fM(0) { }
+   __roohost__ __roodevice__  PtEtaPhiM4D() : fPt(0), fEta(0), fPhi(0), fM(0) { }
 
    /**
       Constructor  from pt, eta, phi, mass values
    */
-   PtEtaPhiM4D(Scalar pt, Scalar eta, Scalar phi, Scalar mass) :
+   __roohost__ __roodevice__  PtEtaPhiM4D(Scalar pt, Scalar eta, Scalar phi, Scalar mass) :
       fPt(pt), fEta(eta), fPhi(phi), fM(mass) {
       RestrictPhi();
       if (fM < 0) RestrictNegMass();
@@ -75,7 +75,7 @@ public :
       Pt(), Eta(), Phi() and M()
    */
    template <class CoordSystem >
-   explicit PtEtaPhiM4D(const CoordSystem & c) :
+   explicit __roohost__ __roodevice__  PtEtaPhiM4D(const CoordSystem & c) :
       fPt(c.Pt()), fEta(c.Eta()), fPhi(c.Phi()), fM(c.M())  { RestrictPhi(); }
 
    // for g++  3.2 and 3.4 on 32 bits found that the compiler generated copy ctor and assignment are much slower
@@ -84,13 +84,13 @@ public :
    /**
       copy constructor
     */
-   PtEtaPhiM4D(const PtEtaPhiM4D & v) :
+   __roohost__ __roodevice__  PtEtaPhiM4D(const PtEtaPhiM4D & v) :
       fPt(v.fPt), fEta(v.fEta), fPhi(v.fPhi), fM(v.fM) { }
 
    /**
       assignment operator
     */
-   PtEtaPhiM4D & operator = (const PtEtaPhiM4D & v) {
+   __roohost__ __roodevice__  PtEtaPhiM4D & operator = (const PtEtaPhiM4D & v) {
       fPt  = v.fPt;
       fEta = v.fEta;
       fPhi = v.fPhi;
@@ -102,7 +102,7 @@ public :
    /**
       Set internal data based on an array of 4 Scalar numbers
    */
-   void SetCoordinates( const Scalar src[] ) {
+   __roohost__ __roodevice__ void SetCoordinates( const Scalar src[] ) {
       fPt=src[0]; fEta=src[1]; fPhi=src[2]; fM=src[3];
       RestrictPhi();
       if (fM <0) RestrictNegMass();
@@ -111,13 +111,13 @@ public :
    /**
       get internal data into an array of 4 Scalar numbers
    */
-   void GetCoordinates( Scalar dest[] ) const
+   __roohost__ __roodevice__ void GetCoordinates( Scalar dest[] ) const
    { dest[0] = fPt; dest[1] = fEta; dest[2] = fPhi; dest[3] = fM; }
 
    /**
       Set internal data based on 4 Scalar numbers
    */
-   void SetCoordinates(Scalar pt, Scalar eta, Scalar phi, Scalar mass) {
+   __roohost__ __roodevice__ void SetCoordinates(Scalar pt, Scalar eta, Scalar phi, Scalar mass) {
       fPt=pt; fEta = eta; fPhi = phi; fM = mass;
       RestrictPhi();
       if (fM <0) RestrictNegMass();
@@ -126,7 +126,7 @@ public :
    /**
       get internal data into 4 Scalar numbers
    */
-   void
+   __roohost__ __roodevice__ void
    GetCoordinates(Scalar& pt, Scalar & eta, Scalar & phi, Scalar& mass) const
    { pt=fPt; eta=fEta; phi = fPhi; mass = fM; }
 
@@ -134,44 +134,44 @@ public :
 
    // 4-D Cylindrical eta coordinate accessors
 
-   Scalar Pt()  const { return fPt;  }
-   Scalar Eta() const { return fEta; }
-   Scalar Phi() const { return fPhi; }
+   __roohost__ __roodevice__ Scalar Pt()  const { return fPt;  }
+   __roohost__ __roodevice__ Scalar Eta() const { return fEta; }
+   __roohost__ __roodevice__ Scalar Phi() const { return fPhi; }
    /**
        M() is the invariant mass;
        in this coordinate system it can be negagative if set that way.
    */
-   Scalar M()   const { return fM;   }
-   Scalar Mag() const { return M(); }
+   __roohost__ __roodevice__ Scalar  M()   const { return fM;   }
+   __roohost__ __roodevice__ Scalar Mag() const { return M(); }
 
-   Scalar Perp()const { return Pt(); }
-   Scalar Rho() const { return Pt(); }
+   __roohost__ __roodevice__ Scalar Perp()const { return Pt(); }
+   __roohost__ __roodevice__ Scalar Rho() const { return Pt(); }
 
    // other coordinate representation
 
-   Scalar Px() const { return fPt * mycos(fPhi); }
-   Scalar X () const { return Px();         }
-   Scalar Py() const { return fPt * mysin(fPhi); }
-   Scalar Y () const { return Py();         }
-   Scalar Pz() const {
+   __roohost__ __roodevice__ Scalar Px() const { return fPt * mycos(fPhi); }
+   __roohost__ __roodevice__ Scalar X () const { return Px();         }
+   __roohost__ __roodevice__ Scalar Py() const { return fPt * mysin(fPhi); }
+   __roohost__ __roodevice__ Scalar Y () const { return Py();         }
+   __roohost__ __roodevice__ Scalar Pz() const {
       return fPt > 0 ? fPt * mysinh(fEta) : fEta == 0 ? 0 : fEta > 0 ? fEta - etaMax<Scalar>() : fEta + etaMax<Scalar>();
    }
-   Scalar Z () const { return Pz(); }
+   __roohost__ __roodevice__ Scalar Z () const { return Pz(); }
 
    /**
        magnitude of momentum
    */
-   Scalar P() const {
+   __roohost__ __roodevice__ Scalar P() const {
       return fPt > 0 ? fPt * mycosh(fEta)
                      : fEta > etaMax<Scalar>() ? fEta - etaMax<Scalar>()
                                                : fEta < -etaMax<Scalar>() ? -fEta - etaMax<Scalar>() : 0;
    }
-   Scalar R() const { return P(); }
+   __roohost__ __roodevice__ Scalar R() const { return P(); }
 
    /**
        squared magnitude of spatial components (momentum squared)
    */
-   Scalar P2() const
+   __roohost__ __roodevice__ Scalar P2() const
    {
       const Scalar p = P();
       return p * p;
@@ -180,7 +180,7 @@ public :
    /**
        energy squared
    */
-   Scalar E2() const {
+   __roohost__ __roodevice__ Scalar E2() const {
       Scalar e2 =  P2() + M2();
       // avoid rounding error which can make E2 negative when M2 is negative
       return e2 > 0 ? e2 : 0;
@@ -189,34 +189,34 @@ public :
    /**
        Energy (timelike component of momentum-energy 4-vector)
    */
-   Scalar E() const { return mysqrt(E2()); }
+   __roohost__ __roodevice__ Scalar E() const { return mysqrt(E2()); }
 
-   Scalar T()   const { return E();  }
+   __roohost__ __roodevice__ Scalar T()   const { return E();  }
 
    /**
       vector magnitude squared (or mass squared)
       In case of negative mass (spacelike particles return negative values)
    */
-   Scalar M2() const   {
+   __roohost__ __roodevice__ Scalar M2() const   {
       return ( fM  >= 0 ) ?  fM*fM :  -fM*fM;
    }
-   Scalar Mag2() const { return M2();  }
+   __roohost__ __roodevice__ Scalar Mag2() const { return M2();  }
 
    /**
        transverse spatial component squared
    */
-   Scalar Pt2()   const { return fPt*fPt;}
-   Scalar Perp2() const { return Pt2();  }
+   __roohost__ __roodevice__ Scalar Pt2()   const { return fPt*fPt;}
+   __roohost__ __roodevice__ Scalar Perp2() const { return Pt2();  }
 
    /**
        transverse mass squared
    */
-   Scalar Mt2() const { return M2()  + fPt*fPt; }
+   __roohost__ __roodevice__ Scalar Mt2() const { return M2()  + fPt*fPt; }
 
    /**
       transverse mass - will be negative if Mt2() is negative
    */
-   Scalar Mt() const {
+   __roohost__ __roodevice__ Scalar Mt() const {
       const Scalar mm = Mt2();
       if (mm >= 0) {
          return mysqrt(mm);
@@ -230,7 +230,7 @@ public :
    /**
        transverse energy squared
    */
-   Scalar Et2() const {
+   __roohost__ __roodevice__ Scalar Et2() const {
       // a bit faster than et * et
       return 2. * E2() / (mycosh(2 * fEta) + 1);
    }
@@ -238,16 +238,16 @@ public :
    /**
       transverse energy
    */
-   Scalar Et() const { return E() / mycosh(fEta); }
+   __roohost__ __roodevice__ Scalar Et() const { return E() / mycosh(fEta); }
 
 private:
-   inline static Scalar pi() { return M_PI; }
-   inline void RestrictPhi() {
+   inline static __roohost__ __roodevice__ Scalar pi() { return M_PI; }
+   inline __roohost__ __roodevice__ void RestrictPhi() {
       if (fPhi <= -pi() || fPhi > pi()) fPhi = fPhi - myfloor(fPhi / (2 * pi()) + .5) * 2 * pi();
    }
    // restrict the value of negative mass to avoid unphysical negative E2 values
    // M2 must be less than P2 for the tachionic particles - otherwise use positive values
-   inline void RestrictNegMass() {
+   inline __roohost__ __roodevice__ void RestrictNegMass() {
       if (fM < 0) {
          if (P2() - fM * fM < 0) {
             //GenVector::Throw("PtEtaPhiM4D::unphysical value of mass, set to closest physical value");
@@ -261,33 +261,33 @@ public:
    /**
       polar angle
    */
-   Scalar Theta() const { return (fPt > 0 ? Scalar(2) * myatan(myexp(-fEta)) : fEta >= 0 ? 0 : pi()); }
+   __roohost__ __roodevice__ Scalar Theta() const { return (fPt > 0 ? Scalar(2) * myatan(myexp(-fEta)) : fEta >= 0 ? 0 : pi()); }
 
    // --------- Set Coordinates of this system  ---------------
 
    /**
       set Pt value
    */
-   void SetPt( Scalar  pt) {
+   __roohost__ __roodevice__ void SetPt( Scalar  pt) {
       fPt = pt;
    }
    /**
       set eta value
    */
-   void SetEta( Scalar  eta) {
+   __roohost__ __roodevice__ void SetEta( Scalar  eta) {
       fEta = eta;
    }
    /**
       set phi value
    */
-   void SetPhi( Scalar  phi) {
+   __roohost__ __roodevice__ void SetPhi( Scalar  phi) {
       fPhi = phi;
       RestrictPhi();
    }
    /**
       set M value
    */
-   void SetM( Scalar  mass) {
+   __roohost__ __roodevice__ void SetM( Scalar  mass) {
       fM = mass;
       if (fM <0) RestrictNegMass();
    }
@@ -295,7 +295,7 @@ public:
    /**
        set values using cartesian coordinate system
    */
-   void SetPxPyPzE(Scalar px, Scalar py, Scalar pz, Scalar e);
+   __roohost__ __roodevice__ void SetPxPyPzE(Scalar px, Scalar py, Scalar pz, Scalar e);
 
 
    // ------ Manipulations -------------
@@ -305,7 +305,7 @@ public:
       therefore negate will work only on the spatial components
       One would need to use negate only with vectors having the energy as data members
    */
-   void Negate( ) {
+   __roohost__ __roodevice__ void Negate( ) {
       fPhi = ( (fPhi > 0) ? fPhi - pi() : fPhi + pi()  );
       fEta = - fEta;
       //GenVector::Throw ("PtEtaPhiM4D::Negate - cannot negate the energy - can negate only the spatial components");
@@ -314,7 +314,7 @@ public:
    /**
       Scale coordinate values by a scalar quantity a
    */
-   void Scale( Scalar a) {
+   __roohost__ __roodevice__ void Scale( Scalar a) {
       if (a < 0) {
          Negate(); a = -a;
       }
@@ -348,23 +348,23 @@ public:
 
    // The following make this coordinate system look enough like a CLHEP
    // vector that an assignment member template can work with either
-   Scalar x() const { return X(); }
-   Scalar y() const { return Y(); }
-   Scalar z() const { return Z(); }
-   Scalar t() const { return E(); }
+   __roohost__ __roodevice__ Scalar x() const { return X(); }
+   __roohost__ __roodevice__ Scalar y() const { return Y(); }
+   __roohost__ __roodevice__ Scalar z() const { return Z(); }
+   __roohost__ __roodevice__ Scalar t() const { return E(); }
 
 
 #if defined(__MAKECINT__) || defined(G__DICTIONARY)
 
    // ====== Set member functions for coordinates in other systems =======
 
-   void SetPx(Scalar px);
+   __roohost__ __roodevice__ void SetPx(Scalar px);
 
-   void SetPy(Scalar py);
+   __roohost__ __roodevice__ void SetPy(Scalar py);
 
-   void SetPz(Scalar pz);
+   __roohost__ __roodevice__ void SetPz(Scalar pz);
 
-   void SetE(Scalar t);
+   __roohost__ __roodevice__ void SetE(Scalar t);
 
 #endif
 
@@ -395,7 +395,7 @@ namespace Experimental {
 
 
 template <class ScalarType>
-inline void PtEtaPhiM4D<ScalarType>::SetPxPyPzE(Scalar px, Scalar py, Scalar pz, Scalar e) {
+inline __roohost__ __roodevice__ void PtEtaPhiM4D<ScalarType>::SetPxPyPzE(Scalar px, Scalar py, Scalar pz, Scalar e) {
    *this = PxPyPzE4D<Scalar> (px, py, pz, e);
 }
 
@@ -405,25 +405,25 @@ inline void PtEtaPhiM4D<ScalarType>::SetPxPyPzE(Scalar px, Scalar py, Scalar pz,
   // ====== Set member functions for coordinates in other systems =======
 
 template <class ScalarType>
-void PtEtaPhiM4D<ScalarType>::SetPx(Scalar px) {
+__roohost__ __roodevice__ void PtEtaPhiM4D<ScalarType>::SetPx(Scalar px) {
    GenVector_exception e("PtEtaPhiM4D::SetPx() is not supposed to be called");
    throw e;
    PxPyPzE4D<Scalar> v(*this); v.SetPx(px); *this = PtEtaPhiM4D<Scalar>(v);
 }
 template <class ScalarType>
-void PtEtaPhiM4D<ScalarType>::SetPy(Scalar py) {
+__roohost__ __roodevice__ void PtEtaPhiM4D<ScalarType>::SetPy(Scalar py) {
    GenVector_exception e("PtEtaPhiM4D::SetPx() is not supposed to be called");
    throw e;
    PxPyPzE4D<Scalar> v(*this); v.SetPy(py); *this = PtEtaPhiM4D<Scalar>(v);
 }
 template <class ScalarType>
-void PtEtaPhiM4D<ScalarType>::SetPz(Scalar pz) {
+__roohost__ __roodevice__ void PtEtaPhiM4D<ScalarType>::SetPz(Scalar pz) {
    GenVector_exception e("PtEtaPhiM4D::SetPx() is not supposed to be called");
    throw e;
    PxPyPzE4D<Scalar> v(*this); v.SetPz(pz); *this = PtEtaPhiM4D<Scalar>(v);
 }
 template <class ScalarType>
-void PtEtaPhiM4D<ScalarType>::SetE(Scalar energy) {
+__roohost__ __roodevice__ void PtEtaPhiM4D<ScalarType>::SetE(Scalar energy) {
    GenVector_exception e("PtEtaPhiM4D::SetE() is not supposed to be called");
    throw e;
    PxPyPzE4D<Scalar> v(*this); v.SetE(energy);   *this = PtEtaPhiM4D<Scalar>(v);

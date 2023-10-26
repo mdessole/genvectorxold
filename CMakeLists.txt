@@ -211,12 +211,21 @@ FORCE)
   endif()
 endif()
 
-
-add_library(SYCLMath SHARED
-src/MathUtil.cxx
-)
+if (cuda)
+  add_library(SYCLMath SHARED
+  src/MathUtil.cu
+  )
+  target_compile_options(SYCLMath PRIVATE -rdc=true -lineinfo --expt-relaxed-constexpr)
+  set_target_properties(SYCLMath PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+  target_compile_definitions(SYCLMath INTERFACE ROOT_MATH_CUDA)
+else()
+  add_library(SYCLMath SHARED
+  src/MathUtil.cxx
+  )
+endif()
 
 set_target_properties(SYCLMath PROPERTIES LINKER_LANGUAGE CXX)
+
 
 if (opensycl)
     #set_target_properties(GenVector PROPERTIES LINKER_LANGUAGE CXX)

@@ -19,5 +19,14 @@ if ( (NOT oneapi) AND (NOT opensycl) )
   target_link_libraries(Coords PUBLIC GenVectorX SYCLMath)
 endif()
 
+
+if (cuda)
+  add_executable(RVecCUDA RVecCUDA.cu)
+  set_target_properties(RVecCUDA PROPERTIES LINKER_LANGUAGE CUDA)
+  target_compile_options(RVecCUDA PRIVATE -rdc=true -lineinfo --expt-relaxed-constexpr)
+  set_target_properties(RVecCUDA PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+  target_compile_definitions(RVecCUDA INTERFACE ROOT_MATH_CUDA)
+endif()
+
 #add_executable(RVec RVec.cpp)
 #target_compile_options(RVec PUBLIC `root-config --libs --cflags`)

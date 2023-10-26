@@ -242,7 +242,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           (if the vector is held in another coordinates, like (Pt,eta,phi,m)
           then (x, y, z, t) are converted to that form)
        */
-       LorentzVector<CoordSystem>& SetXYZT (Scalar xx, Scalar yy, Scalar zz, Scalar tt) {
+       __roohost__ __roodevice__ LorentzVector<CoordSystem>& SetXYZT (Scalar xx, Scalar yy, Scalar zz, Scalar tt) {
           fCoordinates.SetPxPyPzE(xx,yy,zz,tt);
           return *this;
        }
@@ -389,7 +389,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           member functions
        */
       template< class OtherLorentzVector >
-      inline LorentzVector & operator += ( const OtherLorentzVector & q)
+      inline __roohost__ __roodevice__ LorentzVector & operator += ( const OtherLorentzVector & q)
        {
           SetXYZT( x() + q.x(), y() + q.y(), z() + q.z(), t() + q.t()  );
           return *this;
@@ -415,7 +415,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           \return a new LorentzVector of the same type as v1
        */
        template<class OtherLorentzVector>
-       LorentzVector  operator +  ( const OtherLorentzVector & v2) const
+       __roohost__ __roodevice__ LorentzVector  operator +  ( const OtherLorentzVector & v2) const
        {
           LorentzVector<CoordinateType> v3(*this);
           v3 += v2;
@@ -494,7 +494,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        /**
           Rapidity relative to the Z axis:  .5 log [(E+Pz)/(E-Pz)]
        */
-       Scalar Rapidity() const {
+       __roohost__ __roodevice__ Scalar Rapidity() const {
           // TODO - It would be good to check that E > Pz and use the Throw()
           //        mechanism or at least load a NAN if not.
           //        We should then move the code to a .cpp file.
@@ -506,7 +506,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        /**
           Rapidity in the direction of travel: atanh (|P|/E)=.5 log[(E+P)/(E-P)]
        */
-       Scalar ColinearRapidity() const {
+       __roohost__ __roodevice__ Scalar ColinearRapidity() const {
           // TODO - It would be good to check that E > P and use the Throw()
           //        mechanism or at least load a NAN if not.
           const Scalar ee = E();
@@ -517,7 +517,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        /**
           Determine if momentum-energy can represent a physical massive particle
        */
-       bool isTimelike( ) const {
+       __roohost__ __roodevice__ bool isTimelike( ) const {
           Scalar ee = E(); Scalar pp = P(); return ee*ee > pp*pp;
        }
 
@@ -544,7 +544,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           The beta vector for the boost that would bring this vector into
           its center of mass frame (zero momentum)
        */
-       BetaVector BoostToCM( ) const {
+       __roohost__ __roodevice__ BetaVector BoostToCM( ) const {
           if (E() == 0) {
              if (P() == 0) {
                 return BetaVector();
@@ -566,7 +566,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           its center of mass frame (zero momentum)
        */
        template <class Other4Vector>
-       BetaVector BoostToCM(const Other4Vector& v ) const {
+       __roohost__ __roodevice__ BetaVector BoostToCM(const Other4Vector& v ) const {
           Scalar eSum = E() + v.E();
           DisplacementVector3D< Cartesian3D<Scalar> > vecSum = Vect() + v.Vect();
           if (eSum == 0) {
@@ -588,7 +588,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        /**
            Return beta scalar value
        */
-       Scalar Beta() const {
+       __roohost__ __roodevice__ Scalar Beta() const {
           if ( E() == 0 ) {
              if ( P2() == 0)
                 // to avoid Nan
@@ -606,7 +606,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        /**
            Return Gamma scalar value
        */
-       Scalar Gamma() const {
+       __roohost__ __roodevice__ Scalar Gamma() const {
           const Scalar v2 = P2();
           const Scalar t2 = E() * E();
           if (E() == 0) {
@@ -630,31 +630,31 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
 
        // Method providing limited backward name compatibility with CLHEP ----
 
-       Scalar x()     const { return fCoordinates.Px();     }
-       Scalar y()     const { return fCoordinates.Py();     }
-       Scalar z()     const { return fCoordinates.Pz();     }
-       Scalar t()     const { return fCoordinates.E();      }
-       Scalar px()    const { return fCoordinates.Px();     }
-       Scalar py()    const { return fCoordinates.Py();     }
-       Scalar pz()    const { return fCoordinates.Pz();     }
-       Scalar e()     const { return fCoordinates.E();      }
-       Scalar r()     const { return fCoordinates.R();      }
-       Scalar theta() const { return fCoordinates.Theta();  }
-       Scalar phi()   const { return fCoordinates.Phi();    }
-       Scalar rho()   const { return fCoordinates.Rho();    }
-       Scalar eta()   const { return fCoordinates.Eta();    }
-       Scalar pt()    const { return fCoordinates.Pt();     }
-       Scalar perp2() const { return fCoordinates.Perp2();  }
-       Scalar mag2()  const { return fCoordinates.M2();     }
-       Scalar mag()   const { return fCoordinates.M();      }
-       Scalar mt()    const { return fCoordinates.Mt();     }
-       Scalar mt2()   const { return fCoordinates.Mt2();    }
+       __roohost__ __roodevice__ Scalar  x()     const { return fCoordinates.Px();     }
+       __roohost__ __roodevice__ Scalar  y()     const { return fCoordinates.Py();     }
+       __roohost__ __roodevice__ Scalar  z()     const { return fCoordinates.Pz();     }
+       __roohost__ __roodevice__ Scalar  t()     const { return fCoordinates.E();      }
+       __roohost__ __roodevice__ Scalar  px()    const { return fCoordinates.Px();     }
+       __roohost__ __roodevice__ Scalar  py()    const { return fCoordinates.Py();     }
+       __roohost__ __roodevice__ Scalar  pz()    const { return fCoordinates.Pz();     }
+       __roohost__ __roodevice__ Scalar  e()     const { return fCoordinates.E();      }
+       __roohost__ __roodevice__ Scalar  r()     const { return fCoordinates.R();      }
+       __roohost__ __roodevice__ Scalar  theta() const { return fCoordinates.Theta();  }
+       __roohost__ __roodevice__ Scalar  phi()   const { return fCoordinates.Phi();    }
+       __roohost__ __roodevice__ Scalar  rho()   const { return fCoordinates.Rho();    }
+       __roohost__ __roodevice__ Scalar  eta()   const { return fCoordinates.Eta();    }
+       __roohost__ __roodevice__ Scalar  pt()    const { return fCoordinates.Pt();     }
+       __roohost__ __roodevice__ Scalar  perp2() const { return fCoordinates.Perp2();  }
+       __roohost__ __roodevice__ Scalar  mag2()  const { return fCoordinates.M2();     }
+       __roohost__ __roodevice__ Scalar  mag()   const { return fCoordinates.M();      }
+       __roohost__ __roodevice__ Scalar  mt()    const { return fCoordinates.Mt();     }
+       __roohost__ __roodevice__ Scalar  mt2()   const { return fCoordinates.Mt2();    }
 
 
        // Methods  requested by CMS ---
-       Scalar energy() const { return fCoordinates.E();      }
-       Scalar mass()   const { return fCoordinates.M();      }
-       Scalar mass2()  const { return fCoordinates.M2();     }
+       __roohost__ __roodevice__ Scalar energy() const { return fCoordinates.E();      }
+       __roohost__ __roodevice__ Scalar mass()   const { return fCoordinates.M();      }
+       __roohost__ __roodevice__ Scalar mass2()  const { return fCoordinates.M2();     }
 
 
        /**

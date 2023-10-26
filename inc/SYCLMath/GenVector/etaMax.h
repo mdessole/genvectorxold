@@ -34,7 +34,7 @@ namespace ROOT {
         long double.
      */
 #ifdef ROOT_MATH_SYCL 
-    inline
+
      double etaMax_impl() {
       return mylog ( std::numeric_limits< double>::max()/256.0 ) -
              mylog ( std::numeric_limits< double>::denorm_min()*256.0 )
@@ -43,7 +43,7 @@ namespace ROOT {
     // the answer this would supply, rounded to a higher integer.
     }
 #else
-    inline
+__roohost__ __roodevice__ 
      long double etaMax_impl() {
       return mylog ( std::numeric_limits<long double>::max()/256.0 ) -
              mylog ( std::numeric_limits<long double>::denorm_min()*256.0 )
@@ -59,7 +59,7 @@ namespace ROOT {
      */
     template <class T>
     inline
-    T etaMax() {
+  __roohost__ __roodevice__  T etaMax() {
       return static_cast<T>(22756.0);
     }
 

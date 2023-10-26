@@ -50,13 +50,13 @@ public :
    /**
       Default constructor  with x=y=z=t=0
    */
-   PxPyPzE4D() : fX(0.0), fY(0.0), fZ(0.0), fT(0.0) { }
+   __roohost__ __roodevice__ PxPyPzE4D() : fX(0.0), fY(0.0), fZ(0.0), fT(0.0) { }
 
 
    /**
       Constructor  from x, y , z , t values
    */
-   PxPyPzE4D(Scalar px, Scalar py, Scalar pz, Scalar e) :
+   __roohost__ __roodevice__ PxPyPzE4D(Scalar px, Scalar py, Scalar pz, Scalar e) :
       fX(px), fY(py), fZ(pz), fT(e) { }
 
 
@@ -65,7 +65,7 @@ public :
       implementing x(), y() and z() and t()
    */
    template <class CoordSystem>
-   explicit PxPyPzE4D(const CoordSystem & v) :
+   explicit __roohost__ __roodevice__  PxPyPzE4D(const CoordSystem & v) :
       fX( v.x() ), fY( v.y() ), fZ( v.z() ), fT( v.t() )  { }
 
    // for g++  3.2 and 3.4 on 32 bits found that the compiler generated copy ctor and assignment are much slower
@@ -73,13 +73,13 @@ public :
    /**
       copy constructor
     */
-   PxPyPzE4D(const PxPyPzE4D & v) :
+   __roohost__ __roodevice__ PxPyPzE4D(const PxPyPzE4D & v) :
       fX(v.fX), fY(v.fY), fZ(v.fZ), fT(v.fT) { }
 
    /**
       assignment operator
     */
-   PxPyPzE4D & operator = (const PxPyPzE4D & v) {
+   __roohost__ __roodevice__ PxPyPzE4D & operator = (const PxPyPzE4D & v) {
       fX = v.fX;
       fY = v.fY;
       fZ = v.fZ;
@@ -90,64 +90,64 @@ public :
    /**
       Set internal data based on an array of 4 Scalar numbers
    */
-   void SetCoordinates( const Scalar src[] )
+   __roohost__ __roodevice__ void SetCoordinates( const Scalar src[] )
    { fX=src[0]; fY=src[1]; fZ=src[2]; fT=src[3]; }
 
    /**
       get internal data into an array of 4 Scalar numbers
    */
-   void GetCoordinates( Scalar dest[] ) const
+   __roohost__ __roodevice__ void GetCoordinates( Scalar dest[] ) const
    { dest[0] = fX; dest[1] = fY; dest[2] = fZ; dest[3] = fT; }
 
    /**
       Set internal data based on 4 Scalar numbers
    */
-   void SetCoordinates(Scalar  px, Scalar  py, Scalar  pz, Scalar e)
+   __roohost__ __roodevice__ void SetCoordinates(Scalar  px, Scalar  py, Scalar  pz, Scalar e)
    { fX=px; fY=py; fZ=pz; fT=e;}
 
    /**
       get internal data into 4 Scalar numbers
    */
-   void GetCoordinates(Scalar& px, Scalar& py, Scalar& pz, Scalar& e) const
+   __roohost__ __roodevice__ void GetCoordinates(Scalar& px, Scalar& py, Scalar& pz, Scalar& e) const
    { px=fX; py=fY; pz=fZ; e=fT;}
 
    // --------- Coordinates and Coordinate-like Scalar properties -------------
 
    // cartesian (Minkowski)coordinate accessors
 
-   Scalar Px() const { return fX;}
-   Scalar Py() const { return fY;}
-   Scalar Pz() const { return fZ;}
-   Scalar E()  const { return fT;}
+   __roohost__ __roodevice__ Scalar Px() const { return fX;}
+   __roohost__ __roodevice__ Scalar Py() const { return fY;}
+   __roohost__ __roodevice__ Scalar Pz() const { return fZ;}
+   __roohost__ __roodevice__ Scalar E()  const { return fT;}
 
-   Scalar X() const { return fX;}
-   Scalar Y() const { return fY;}
-   Scalar Z() const { return fZ;}
-   Scalar T() const { return fT;}
+   __roohost__ __roodevice__ Scalar X() const { return fX;}
+   __roohost__ __roodevice__ Scalar Y() const { return fY;}
+   __roohost__ __roodevice__ Scalar Z() const { return fZ;}
+   __roohost__ __roodevice__ Scalar T() const { return fT;}
 
    // other coordinate representation
 
    /**
       squared magnitude of spatial components
    */
-   Scalar P2() const { return fX*fX + fY*fY + fZ*fZ; }
+   __roohost__ __roodevice__ Scalar P2() const { return fX*fX + fY*fY + fZ*fZ; }
 
    /**
       magnitude of spatial components (magnitude of 3-momentum)
    */
-   Scalar P() const {  return mysqrt(P2()); }
-   Scalar R() const { return P(); }
+   __roohost__ __roodevice__ Scalar P() const {  return mysqrt(P2()); }
+   __roohost__ __roodevice__ Scalar R() const { return P(); }
 
    /**
       vector magnitude squared (or mass squared)
    */
-   Scalar M2() const   { return fT*fT - fX*fX - fY*fY - fZ*fZ;}
-   Scalar Mag2() const { return M2(); }
+   __roohost__ __roodevice__ Scalar M2() const   { return fT*fT - fX*fX - fY*fY - fZ*fZ;}
+   __roohost__ __roodevice__ Scalar Mag2() const { return M2(); }
 
    /**
       invariant mass
    */
-   Scalar M() const
+   __roohost__ __roodevice__ Scalar M() const
    {
       const Scalar mm = M2();
       if (mm >= 0) {
@@ -158,30 +158,30 @@ public :
          return -mysqrt(-mm);
       }
    }
-   Scalar Mag() const    { return M(); }
+   __roohost__ __roodevice__ Scalar Mag() const    { return M(); }
 
    /**
        transverse spatial component squared
    */
-   Scalar Pt2()   const { return fX*fX + fY*fY;}
-   Scalar Perp2() const { return Pt2();}
+   __roohost__ __roodevice__ Scalar Pt2()   const { return fX*fX + fY*fY;}
+   __roohost__ __roodevice__ Scalar Perp2() const { return Pt2();}
 
    /**
       Transverse spatial component (P_perp or rho)
    */
-   Scalar Pt() const { return mysqrt(Perp2()); }
-   Scalar Perp() const { return Pt();}
-   Scalar Rho()  const { return Pt();}
+   __roohost__ __roodevice__ Scalar Pt() const { return mysqrt(Perp2()); }
+   __roohost__ __roodevice__ Scalar Perp() const { return Pt();}
+   __roohost__ __roodevice__ Scalar Rho()  const { return Pt();}
 
    /**
        transverse mass squared
    */
-   Scalar Mt2() const { return fT*fT - fZ*fZ; }
+   __roohost__ __roodevice__ Scalar Mt2() const { return fT*fT - fZ*fZ; }
 
    /**
       transverse mass
    */
-   Scalar Mt() const {
+   __roohost__ __roodevice__ Scalar Mt() const {
       const Scalar mm = Mt2();
       if (mm >= 0) {
          return mysqrt(mm);
@@ -195,7 +195,7 @@ public :
    /**
        transverse energy squared
    */
-   Scalar Et2() const {  // is (E^2 * pt ^2) / p^2
+   __roohost__ __roodevice__ Scalar Et2() const {  // is (E^2 * pt ^2) / p^2
       // but it is faster to form p^2 from pt^2
       Scalar pt2 = Pt2();
       return pt2 == 0 ? 0 : fT*fT * pt2/( pt2 + fZ*fZ );
@@ -204,7 +204,7 @@ public :
    /**
       transverse energy
    */
-   Scalar Et() const {
+   __roohost__ __roodevice__ Scalar Et() const {
       const Scalar etet = Et2();
       return fT < 0.0 ? -mysqrt(etet) : mysqrt(etet);
    }
@@ -212,17 +212,17 @@ public :
    /**
       azimuthal angle
    */
-   Scalar Phi() const { return (fX == 0.0 && fY == 0.0) ? 0 : myatan2(fY, fX); }
+   __roohost__ __roodevice__ Scalar Phi() const { return (fX == 0.0 && fY == 0.0) ? 0 : myatan2(fY, fX); }
 
    /**
       polar angle
    */
-   Scalar Theta() const { return (fX == 0.0 && fY == 0.0 && fZ == 0.0) ? 0 : myatan2(Pt(), fZ); }
+   __roohost__ __roodevice__ Scalar Theta() const { return (fX == 0.0 && fY == 0.0 && fZ == 0.0) ? 0 : myatan2(Pt(), fZ); }
 
    /**
        pseudorapidity
    */
-   Scalar Eta() const {
+   __roohost__ __roodevice__ Scalar Eta() const {
       return Eta_FromRhoZ ( Pt(), fZ);
    }
 
@@ -232,32 +232,32 @@ public :
    /**
       set X value
    */
-   void SetPx( Scalar  px) {
+   __roohost__ __roodevice__ void SetPx( Scalar  px) {
       fX = px;
    }
    /**
       set Y value
    */
-   void SetPy( Scalar  py) {
+   __roohost__ __roodevice__ void SetPy( Scalar  py) {
       fY = py;
    }
    /**
       set Z value
    */
-   void SetPz( Scalar  pz) {
+   __roohost__ __roodevice__ void SetPz( Scalar  pz) {
       fZ = pz;
    }
    /**
       set T value
    */
-   void SetE( Scalar  e) {
+   __roohost__ __roodevice__ void SetE( Scalar  e) {
       fT = e;
    }
 
    /**
        set all values using cartesian coordinates
    */
-   void SetPxPyPzE(Scalar px, Scalar py, Scalar pz, Scalar e) {
+   __roohost__ __roodevice__ void SetPxPyPzE(Scalar px, Scalar py, Scalar pz, Scalar e) {
       fX=px;
       fY=py;
       fZ=pz;
@@ -271,12 +271,12 @@ public :
    /**
       negate the 4-vector
    */
-   void Negate( ) { fX = -fX; fY = -fY;  fZ = -fZ; fT = -fT;}
+   __roohost__ __roodevice__ void Negate( ) { fX = -fX; fY = -fY;  fZ = -fZ; fT = -fT;}
 
    /**
       scale coordinate values by a scalar quantity a
    */
-   void Scale( const Scalar & a) {
+   __roohost__ __roodevice__ void Scale( const Scalar & a) {
       fX *= a;
       fY *= a;
       fZ *= a;
@@ -309,10 +309,10 @@ public :
 
    // The following make this coordinate system look enough like a CLHEP
    // vector that an assignment member template can work with either
-   Scalar x() const { return fX; }
-   Scalar y() const { return fY; }
-   Scalar z() const { return fZ; }
-   Scalar t() const { return fT; }
+   __roohost__ __roodevice__ Scalar x() const { return fX; }
+   __roohost__ __roodevice__ Scalar y() const { return fY; }
+   __roohost__ __roodevice__ Scalar z() const { return fZ; }
+   __roohost__ __roodevice__ Scalar t() const { return fT; }
 
 
 
@@ -320,13 +320,13 @@ public :
 
    // ====== Set member functions for coordinates in other systems =======
 
-   void SetPt(Scalar pt);
+   __roohost__ __roodevice__ void SetPt(Scalar pt);
 
-   void SetEta(Scalar eta);
+   __roohost__ __roodevice__ void SetEta(Scalar eta);
 
-   void SetPhi(Scalar phi);
+   __roohost__ __roodevice__ void SetPhi(Scalar phi);
 
-   void SetM(Scalar m);
+   __roohost__ __roodevice__ void SetM(Scalar m);
 
 #endif
 
@@ -365,26 +365,26 @@ namespace Experimental {
     // throw always exceptions  in this case
 
 template <class ScalarType>
-void PxPyPzE4D<ScalarType>::SetPt(Scalar pt) {
+__roohost__ __roodevice__ void PxPyPzE4D<ScalarType>::SetPt(Scalar pt) {
    GenVector_exception e("PxPyPzE4D::SetPt() is not supposed to be called");
    throw e;
    PtEtaPhiE4D<Scalar> v(*this); v.SetPt(pt); *this = PxPyPzE4D<Scalar>(v);
 }
 template <class ScalarType>
-void PxPyPzE4D<ScalarType>::SetEta(Scalar eta) {
+__roohost__ __roodevice__ void PxPyPzE4D<ScalarType>::SetEta(Scalar eta) {
    GenVector_exception e("PxPyPzE4D::SetEta() is not supposed to be called");
    throw e;
    PtEtaPhiE4D<Scalar> v(*this); v.SetEta(eta); *this = PxPyPzE4D<Scalar>(v);
 }
 template <class ScalarType>
-void PxPyPzE4D<ScalarType>::SetPhi(Scalar phi) {
+__roohost__ __roodevice__ void PxPyPzE4D<ScalarType>::SetPhi(Scalar phi) {
    GenVector_exception e("PxPyPzE4D::SetPhi() is not supposed to be called");
    throw e;
    PtEtaPhiE4D<Scalar> v(*this); v.SetPhi(phi); *this = PxPyPzE4D<Scalar>(v);
 }
 
 template <class ScalarType>
-void PxPyPzE4D<ScalarType>::SetM(Scalar m) {
+__roohost__ __roodevice__ void PxPyPzE4D<ScalarType>::SetM(Scalar m) {
    GenVector_exception e("PxPyPzE4D::SetM() is not supposed to be called");
    throw e;
    PtEtaPhiM4D<Scalar> v(*this); v.SetM(m);
