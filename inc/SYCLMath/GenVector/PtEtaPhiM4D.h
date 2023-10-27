@@ -75,7 +75,7 @@ public :
       Pt(), Eta(), Phi() and M()
    */
    template <class CoordSystem >
-   explicit __roohost__ __roodevice__  PtEtaPhiM4D(const CoordSystem & c) :
+    __roohost__ __roodevice__ explicit PtEtaPhiM4D(const CoordSystem & c) :
       fPt(c.Pt()), fEta(c.Eta()), fPhi(c.Phi()), fM(c.M())  { RestrictPhi(); }
 
    // for g++  3.2 and 3.4 on 32 bits found that the compiler generated copy ctor and assignment are much slower
@@ -241,13 +241,13 @@ public :
    __roohost__ __roodevice__ Scalar Et() const { return E() / mycosh(fEta); }
 
 private:
-   inline static __roohost__ __roodevice__ Scalar pi() { return M_PI; }
-   inline __roohost__ __roodevice__ void RestrictPhi() {
+    __roohost__ __roodevice__ static Scalar pi() { return M_PI; }
+    __roohost__ __roodevice__ void RestrictPhi() {
       if (fPhi <= -pi() || fPhi > pi()) fPhi = fPhi - myfloor(fPhi / (2 * pi()) + .5) * 2 * pi();
    }
    // restrict the value of negative mass to avoid unphysical negative E2 values
    // M2 must be less than P2 for the tachionic particles - otherwise use positive values
-   inline __roohost__ __roodevice__ void RestrictNegMass() {
+    __roohost__ __roodevice__ void RestrictNegMass() {
       if (fM < 0) {
          if (P2() - fM * fM < 0) {
             //GenVector::Throw("PtEtaPhiM4D::unphysical value of mass, set to closest physical value");
@@ -327,7 +327,7 @@ public:
       Pt(), Eta(), Phi() and M()
    */
    template <class CoordSystem >
-   PtEtaPhiM4D & operator = (const CoordSystem & c) {
+   __roohost__ __roodevice__ PtEtaPhiM4D & operator = (const CoordSystem & c) {
       fPt  = c.Pt();
       fEta = c.Eta();
       fPhi = c.Phi();
@@ -338,11 +338,11 @@ public:
    /**
       Exact equality
    */
-   bool operator == (const PtEtaPhiM4D & rhs) const {
+   __roohost__ __roodevice__ bool operator == (const PtEtaPhiM4D & rhs) const {
       return fPt == rhs.fPt && fEta == rhs.fEta
          && fPhi == rhs.fPhi && fM == rhs.fM;
    }
-   bool operator != (const PtEtaPhiM4D & rhs) const {return !(operator==(rhs));}
+   __roohost__ __roodevice__ bool operator != (const PtEtaPhiM4D & rhs) const {return !(operator==(rhs));}
 
    // ============= Compatibility section ==================
 
@@ -395,7 +395,7 @@ namespace Experimental {
 
 
 template <class ScalarType>
-inline __roohost__ __roodevice__ void PtEtaPhiM4D<ScalarType>::SetPxPyPzE(Scalar px, Scalar py, Scalar pz, Scalar e) {
+ __roohost__ __roodevice__ void PtEtaPhiM4D<ScalarType>::SetPxPyPzE(Scalar px, Scalar py, Scalar pz, Scalar e) {
    *this = PxPyPzE4D<Scalar> (px, py, pz, e);
 }
 

@@ -65,7 +65,7 @@ public :
       implementing x(), y() and z() and t()
    */
    template <class CoordSystem>
-   explicit __roohost__ __roodevice__  PxPyPzE4D(const CoordSystem & v) :
+    __roohost__ __roodevice__ explicit PxPyPzE4D(const CoordSystem & v) :
       fX( v.x() ), fY( v.y() ), fZ( v.z() ), fT( v.t() )  { }
 
    // for g++  3.2 and 3.4 on 32 bits found that the compiler generated copy ctor and assignment are much slower
@@ -288,7 +288,7 @@ public :
       x(), y(), z() and t()
    */
    template <class AnyCoordSystem>
-   PxPyPzE4D & operator = (const AnyCoordSystem & v) {
+   __roohost__ __roodevice__ PxPyPzE4D & operator = (const AnyCoordSystem & v) {
       fX = v.x();
       fY = v.y();
       fZ = v.z();
@@ -299,10 +299,10 @@ public :
    /**
       Exact equality
    */
-   bool operator == (const PxPyPzE4D & rhs) const {
+   __roohost__ __roodevice__ bool operator == (const PxPyPzE4D & rhs) const {
       return fX == rhs.fX && fY == rhs.fY && fZ == rhs.fZ && fT == rhs.fT;
    }
-   bool operator != (const PxPyPzE4D & rhs) const {return !(operator==(rhs));}
+   __roohost__ __roodevice__ bool operator != (const PxPyPzE4D & rhs) const {return !(operator==(rhs));}
 
 
    // ============= Compatibility section ==================

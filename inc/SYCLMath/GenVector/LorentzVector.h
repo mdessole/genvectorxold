@@ -70,7 +70,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        /**
           default constructor of an empty vector (Px = Py = Pz = E = 0 )
        */
-       LorentzVector ( ) : fCoordinates() { }
+        __roohost__ __roodevice__ LorentzVector ( ) : fCoordinates() { }
 
        /**
           generic constructors from four scalar values.
@@ -81,7 +81,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           \param c scalar value (Pz)
           \param d scalar value (E)
        */
-       LorentzVector(const Scalar & a,
+        __roohost__ __roodevice__ LorentzVector(const Scalar & a,
                      const Scalar & b,
                      const Scalar & c,
                      const Scalar & d) :
@@ -92,7 +92,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           coordinates, or using a different Scalar type
        */
        template< class Coords >
-       explicit LorentzVector(const LorentzVector<Coords> & v ) :
+         __roohost__ __roodevice__ explicit LorentzVector(const LorentzVector<Coords> & v ) :
           fCoordinates( v.Coordinates() ) { }
 
        /**
@@ -104,7 +104,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
                                     + std::declval<ForeignLorentzVector>().y()
                                     + std::declval<ForeignLorentzVector>().z()
                                     + std::declval<ForeignLorentzVector>().t())>
-       explicit LorentzVector( const ForeignLorentzVector & v) :
+         __roohost__ __roodevice__ explicit LorentzVector( const ForeignLorentzVector & v) :
           fCoordinates(PxPyPzE4D<Scalar>( v.x(), v.y(), v.z(), v.t()  ) ) { }
 
 #ifdef LATER
@@ -117,7 +117,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           \param index0 index of first vector element (Px)
        */
        template< class LAVector >
-       explicit LorentzVector(const LAVector & v, size_t index0 ) {
+         __roohost__ __roodevice__ explicit LorentzVector(const LAVector & v, size_t index0 ) {
           fCoordinates = CoordSystem ( v[index0], v[index0+1], v[index0+2], v[index0+3] );
        }
 #endif
@@ -129,7 +129,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           Assignment operator from a lorentz vector of arbitrary type
        */
        template< class OtherCoords >
-       LorentzVector & operator= ( const LorentzVector<OtherCoords> & v) {
+        __roohost__ __roodevice__ LorentzVector & operator= ( const LorentzVector<OtherCoords> & v) {
           fCoordinates = v.Coordinates();
           return *this;
        }
@@ -143,7 +143,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
                                     + std::declval<ForeignLorentzVector>().y()
                                     + std::declval<ForeignLorentzVector>().z()
                                     + std::declval<ForeignLorentzVector>().t())>
-       LorentzVector & operator = ( const ForeignLorentzVector & v) {
+        __roohost__ __roodevice__ LorentzVector & operator = ( const ForeignLorentzVector & v) {
           SetXYZT( v.x(), v.y(), v.z(), v.t() );
           return *this;
        }
@@ -158,7 +158,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           \param index0 index of first vector element (Px)
        */
        template< class LAVector >
-       LorentzVector & AssignFrom(const LAVector & v, size_t index0=0 ) {
+       __roohost__ __roodevice__ LorentzVector & AssignFrom(const LAVector & v, size_t index0=0 ) {
           fCoordinates.SetCoordinates( v[index0], v[index0+1], v[index0+2], v[index0+3] );
           return *this;
        }
@@ -169,14 +169,14 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        /**
           Retrieve a const reference to  the coordinates object
        */
-       const CoordSystem & Coordinates() const {
+        __roohost__ __roodevice__ const CoordSystem &  Coordinates() const {
           return fCoordinates;
        }
 
        /**
           Set internal data based on an array of 4 Scalar numbers
        */
-       LorentzVector<CoordSystem>& SetCoordinates( const Scalar src[] ) {
+       __roohost__ __roodevice__ LorentzVector<CoordSystem>& SetCoordinates( const Scalar src[] ) {
           fCoordinates.SetCoordinates(src);
           return *this;
        }
@@ -184,7 +184,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        /**
           Set internal data based on 4 Scalar numbers
        */
-       LorentzVector<CoordSystem>& SetCoordinates( Scalar a, Scalar b, Scalar c, Scalar d ) {
+       __roohost__ __roodevice__ LorentzVector<CoordSystem>& SetCoordinates( Scalar a, Scalar b, Scalar c, Scalar d ) {
           fCoordinates.SetCoordinates(a, b, c, d);
           return *this;
        }
@@ -193,7 +193,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           Set internal data based on 4 Scalars at *begin to *end
        */
        template< class IT >
-       LorentzVector<CoordSystem>& SetCoordinates( IT begin, IT end  ) {
+       __roohost__ __roodevice__ LorentzVector<CoordSystem>& SetCoordinates( IT begin, IT end  ) {
           IT a = begin; IT b = ++begin; IT c = ++begin; IT d = ++begin;
           (void)end;
           assert (++begin==end);
@@ -204,20 +204,20 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        /**
           get internal data into 4 Scalar numbers
        */
-       void GetCoordinates( Scalar& a, Scalar& b, Scalar& c, Scalar & d ) const
+       __roohost__ __roodevice__ void GetCoordinates( Scalar& a, Scalar& b, Scalar& c, Scalar & d ) const
        { fCoordinates.GetCoordinates(a, b, c, d);  }
 
        /**
           get internal data into an array of 4 Scalar numbers
        */
-       void GetCoordinates( Scalar dest[] ) const
+       __roohost__ __roodevice__ void GetCoordinates( Scalar dest[] ) const
        { fCoordinates.GetCoordinates(dest);  }
 
        /**
           get internal data into 4 Scalars at *begin to *end
        */
        template <class IT>
-       void GetCoordinates( IT begin, IT end ) const
+       __roohost__ __roodevice__ void GetCoordinates( IT begin, IT end ) const
        { IT a = begin; IT b = ++begin; IT c = ++begin; IT d = ++begin;
        (void)end;
        assert (++begin==end);
@@ -228,7 +228,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           get internal data into 4 Scalars at *begin
        */
        template <class IT>
-       void GetCoordinates( IT begin ) const {
+       __roohost__ __roodevice__ void GetCoordinates( IT begin ) const {
           Scalar a,b,c,d = 0;
           GetCoordinates (a,b,c,d);
           *begin++ = a;
@@ -246,7 +246,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           fCoordinates.SetPxPyPzE(xx,yy,zz,tt);
           return *this;
        }
-       LorentzVector<CoordSystem>& SetPxPyPzE (Scalar xx, Scalar yy, Scalar zz, Scalar ee) {
+       __roohost__ __roodevice__ LorentzVector<CoordSystem>& SetPxPyPzE (Scalar xx, Scalar yy, Scalar zz, Scalar ee) {
           fCoordinates.SetPxPyPzE(xx,yy,zz,ee);
           return *this;
        }
@@ -256,10 +256,10 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        /**
           Exact equality
        */
-       bool operator==(const LorentzVector & rhs) const {
+       __roohost__ __roodevice__ bool operator==(const LorentzVector & rhs) const {
           return fCoordinates==rhs.fCoordinates;
        }
-       bool operator!= (const LorentzVector & rhs) const {
+       __roohost__ __roodevice__ bool operator!= (const LorentzVector & rhs) const {
           return !(operator==(rhs));
        }
 
@@ -270,93 +270,93 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        /**
           spatial X component
        */
-       Scalar Px() const  { return fCoordinates.Px(); }
-       Scalar X()  const  { return fCoordinates.Px(); }
+       __roohost__ __roodevice__ Scalar Px() const  { return fCoordinates.Px(); }
+       __roohost__ __roodevice__ Scalar X()  const  { return fCoordinates.Px(); }
        /**
           spatial Y component
        */
-       Scalar Py() const { return fCoordinates.Py(); }
-       Scalar Y()  const { return fCoordinates.Py(); }
+       __roohost__ __roodevice__ Scalar Py() const { return fCoordinates.Py(); }
+       __roohost__ __roodevice__ Scalar Y()  const { return fCoordinates.Py(); }
        /**
           spatial Z component
        */
-       Scalar Pz() const { return fCoordinates.Pz(); }
-       Scalar Z()  const { return fCoordinates.Pz(); }
+       __roohost__ __roodevice__ Scalar  Pz() const { return fCoordinates.Pz(); }
+       __roohost__ __roodevice__ Scalar  Z()  const { return fCoordinates.Pz(); }
        /**
           return 4-th component (time, or energy for a 4-momentum vector)
        */
-       Scalar E()  const { return fCoordinates.E(); }
-       Scalar T()  const { return fCoordinates.E(); }
+       __roohost__ __roodevice__ Scalar  E()  const { return fCoordinates.E(); }
+       __roohost__ __roodevice__ Scalar  T()  const { return fCoordinates.E(); }
        /**
           return magnitude (mass) squared  M2 = T**2 - X**2 - Y**2 - Z**2
           (we use -,-,-,+ metric)
        */
-       Scalar M2()   const { return fCoordinates.M2(); }
+       __roohost__ __roodevice__ Scalar  M2()   const { return fCoordinates.M2(); }
        /**
           return magnitude (mass) using the  (-,-,-,+)  metric.
           If M2 is negative (space-like vector) a GenVector_exception
           is suggested and if continuing, - sqrt( -M2) is returned
        */
-       Scalar M() const    { return fCoordinates.M();}
+       __roohost__ __roodevice__ Scalar  M() const    { return fCoordinates.M();}
        /**
           return the spatial (3D) magnitude ( sqrt(X**2 + Y**2 + Z**2) )
        */
-       Scalar R() const { return fCoordinates.R(); }
-       Scalar P() const { return fCoordinates.R(); }
+       __roohost__ __roodevice__ Scalar  R() const { return fCoordinates.R(); }
+       __roohost__ __roodevice__ Scalar  P() const { return fCoordinates.R(); }
        /**
           return the square of the spatial (3D) magnitude ( X**2 + Y**2 + Z**2 )
        */
-       Scalar P2() const { return P() * P(); }
+       __roohost__ __roodevice__ Scalar  P2() const { return P() * P(); }
        /**
           return the square of the transverse spatial component ( X**2 + Y**2 )
        */
-       Scalar Perp2( ) const { return fCoordinates.Perp2();}
+       __roohost__ __roodevice__ Scalar  Perp2( ) const { return fCoordinates.Perp2();}
 
        /**
           return the  transverse spatial component sqrt ( X**2 + Y**2 )
        */
-       Scalar Pt()  const { return fCoordinates.Pt(); }
-       Scalar Rho() const { return fCoordinates.Pt(); }
+       __roohost__ __roodevice__ Scalar  Pt()  const { return fCoordinates.Pt(); }
+       __roohost__ __roodevice__ Scalar  Rho() const { return fCoordinates.Pt(); }
 
        /**
           return the transverse mass squared
           \f[ m_t^2 = E^2 - p{_z}^2 \f]
        */
-       Scalar Mt2() const { return fCoordinates.Mt2(); }
+       __roohost__ __roodevice__ Scalar  Mt2() const { return fCoordinates.Mt2(); }
 
        /**
           return the transverse mass
           \f[ \sqrt{ m_t^2 = E^2 - p{_z}^2} X sign(E^ - p{_z}^2) \f]
        */
-       Scalar Mt() const { return fCoordinates.Mt(); }
+       __roohost__ __roodevice__ Scalar  Mt() const { return fCoordinates.Mt(); }
 
        /**
           return the transverse energy squared
           \f[ e_t = \frac{E^2 p_{\perp}^2 }{ |p|^2 } \f]
        */
-       Scalar Et2() const { return fCoordinates.Et2(); }
+       __roohost__ __roodevice__ Scalar  Et2() const { return fCoordinates.Et2(); }
 
        /**
           return the transverse energy
           \f[ e_t = \sqrt{ \frac{E^2 p_{\perp}^2 }{ |p|^2 } } X sign(E) \f]
        */
-       Scalar Et() const { return fCoordinates.Et(); }
+       __roohost__ __roodevice__ Scalar  Et() const { return fCoordinates.Et(); }
 
        /**
           azimuthal  Angle
        */
-       Scalar Phi() const  { return fCoordinates.Phi();}
+       __roohost__ __roodevice__ Scalar  Phi() const  { return fCoordinates.Phi();}
 
        /**
           polar Angle
        */
-       Scalar Theta() const { return fCoordinates.Theta(); }
+       __roohost__ __roodevice__ Scalar  Theta() const { return fCoordinates.Theta(); }
 
        /**
           pseudorapidity
           \f[ \eta = - \ln { \tan { \frac { \theta} {2} } } \f]
        */
-       Scalar Eta() const { return fCoordinates.Eta(); }
+       __roohost__ __roodevice__ Scalar  Eta() const { return fCoordinates.Eta(); }
 
        /**
           get the spatial components of the Vector in a
@@ -378,7 +378,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        */
 
        template< class OtherLorentzVector >
-       Scalar Dot(const OtherLorentzVector & q) const {
+       __roohost__ __roodevice__ Scalar  Dot(const OtherLorentzVector & q) const {
           return t()*q.t() - x()*q.x() - y()*q.y() - z()*q.z();
        }
 
@@ -430,7 +430,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           \return a new LorentzVector of the same type as v1
        */
        template<class OtherLorentzVector>
-       LorentzVector  operator -  ( const OtherLorentzVector & v2) const {
+       __roohost__ __roodevice__ LorentzVector   operator -  ( const OtherLorentzVector & v2) const {
           LorentzVector<CoordinateType> v3(*this);
           v3 -= v2;
           return v3;
@@ -441,7 +441,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        /**
           multiplication by a scalar quantity v *= a
        */
-       LorentzVector & operator *= (Scalar a) {
+       __roohost__ __roodevice__ LorentzVector  & operator *= (Scalar a) {
           fCoordinates.Scale(a);
           return *this;
        }
@@ -449,7 +449,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
        /**
           division by a scalar quantity v /= a
        */
-       LorentzVector & operator /= (Scalar a) {
+       __roohost__ __roodevice__ LorentzVector  & operator /= (Scalar a) {
           fCoordinates.Scale(1/a);
           return *this;
        }
@@ -459,7 +459,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           \param a  scalar quantity of type a
           \return a new mathcoreLorentzVector q = v * a same type as v
        */
-       LorentzVector operator * ( const Scalar & a) const {
+       __roohost__ __roodevice__ LorentzVector  operator * ( const Scalar & a) const {
           LorentzVector tmp(*this);
           tmp *= a;
           return tmp;
@@ -470,7 +470,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           \param a  scalar quantity of type a
           \return a new mathcoreLorentzVector q = v / a same type as v
        */
-       LorentzVector<CoordSystem> operator / ( const Scalar & a) const {
+       __roohost__ __roodevice__ LorentzVector <CoordSystem> operator / ( const Scalar & a) const {
           LorentzVector<CoordSystem> tmp(*this);
           tmp /= a;
           return tmp;
@@ -480,12 +480,12 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           Negative of a LorentzVector (q = - v )
           \return a new LorentzVector with opposite direction and time
        */
-       LorentzVector operator - () const {
+       __roohost__ __roodevice__ LorentzVector  operator - () const {
           //LorentzVector<CoordinateType> v(*this);
           //v.Negate();
           return operator*( Scalar(-1) );
        }
-       LorentzVector operator + () const {
+       __roohost__ __roodevice__ LorentzVector  operator + () const {
           return *this;
        }
 
@@ -662,14 +662,14 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
           Work only if the component is one of which the vector is represented.
           For example SetE will work for a PxPyPzE Vector but not for a PxPyPzM Vector.
        */
-       LorentzVector<CoordSystem>& SetE  ( Scalar a )  { fCoordinates.SetE  (a); return *this; }
-       LorentzVector<CoordSystem>& SetEta( Scalar a )  { fCoordinates.SetEta(a); return *this; }
-       LorentzVector<CoordSystem>& SetM  ( Scalar a )  { fCoordinates.SetM  (a); return *this; }
-       LorentzVector<CoordSystem>& SetPhi( Scalar a )  { fCoordinates.SetPhi(a); return *this; }
-       LorentzVector<CoordSystem>& SetPt ( Scalar a )  { fCoordinates.SetPt (a); return *this; }
-       LorentzVector<CoordSystem>& SetPx ( Scalar a )  { fCoordinates.SetPx (a); return *this; }
-       LorentzVector<CoordSystem>& SetPy ( Scalar a )  { fCoordinates.SetPy (a); return *this; }
-       LorentzVector<CoordSystem>& SetPz ( Scalar a )  { fCoordinates.SetPz (a); return *this; }
+       __roohost__ __roodevice__ LorentzVector <CoordSystem>& SetE  ( Scalar a )  { fCoordinates.SetE  (a); return *this; }
+       __roohost__ __roodevice__ LorentzVector <CoordSystem>& SetEta( Scalar a )  { fCoordinates.SetEta(a); return *this; }
+       __roohost__ __roodevice__ LorentzVector <CoordSystem>& SetM  ( Scalar a )  { fCoordinates.SetM  (a); return *this; }
+       __roohost__ __roodevice__ LorentzVector <CoordSystem>& SetPhi( Scalar a )  { fCoordinates.SetPhi(a); return *this; }
+       __roohost__ __roodevice__ LorentzVector <CoordSystem>& SetPt ( Scalar a )  { fCoordinates.SetPt (a); return *this; }
+       __roohost__ __roodevice__ LorentzVector <CoordSystem>& SetPx ( Scalar a )  { fCoordinates.SetPx (a); return *this; }
+       __roohost__ __roodevice__ LorentzVector <CoordSystem>& SetPy ( Scalar a )  { fCoordinates.SetPy (a); return *this; }
+       __roohost__ __roodevice__ LorentzVector <CoordSystem>& SetPz ( Scalar a )  { fCoordinates.SetPz (a); return *this; }
 
     private:
 
@@ -689,7 +689,7 @@ ROOT provides specialisations and aliases to them of the ROOT::Experimental::Lor
      \return a new mathcoreLorentzVector q = v * a same type as v
    */
     template< class CoordSystem >
-    inline LorentzVector<CoordSystem> operator *
+     __roohost__ __roodevice__ LorentzVector <CoordSystem> operator *
     ( const typename  LorentzVector<CoordSystem>::Scalar & a,
       const LorentzVector<CoordSystem>& v) {
        LorentzVector<CoordSystem> tmp(v);
