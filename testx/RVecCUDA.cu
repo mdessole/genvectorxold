@@ -11,6 +11,16 @@ using vec4d = ROOT::Experimental::LorentzVector<
 template <class T>
 using Vector = std::vector<T>;
 
+
+#define ERRCHECK(err) __checkCudaErrors((err),__FILE__, __LINE__)
+inline static void __checkCudaErrors(cudaError_t code, const char *file, int line, bool abort=true)
+{
+   if (code != cudaSuccess) {
+      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+      if (abort) exit(code);
+   }
+}
+
 #ifndef RVecCUDA_H
 #define RVecCUDA_H
 
@@ -34,8 +44,7 @@ __global__ void InvariantMassesKernel(Vec v1, Vec v2, Mass m, size_t N)
   int id = blockDim.x * blockIdx.x + threadIdx.x;
   if (id < N)
   {
-    vec4d w = v1[id];
-    w+=v2[id];
+    vec4d w = v1[id]+v2[id];
     m[id] = w.mass();
   }
 }
@@ -45,39 +54,41 @@ __global__ void InvariantMassesKernel(Vec v1, Vec v2, Mass m, size_t N)
 #endif
 
 arithmetic_type* InvariantMasses(vec4d* v1, vec4d* v2,  const size_t N,
-                                      const size_t local_size)
+                                const size_t local_size)
 {
 
   arithmetic_type* invMasses = new arithmetic_type[N];
 
-  size_t sizeVec = N*sizeof(vec4d);
   auto start = std::chrono::system_clock::now();
   cudaError_t err;
 {
 // Allocate the device input vector A
   vec4d* d_v1 = NULL;
-  err = cudaMalloc((void **)&d_v1, sizeVec);
-
+  err = cudaMalloc((void **)&d_v1, N*sizeof(vec4d));
+  ERRCHECK(err);
 
   // Allocate the device input vector B
   vec4d* d_v2 = NULL;
-  err = cudaMalloc((void **)&d_v2, sizeVec);
+  err = cudaMalloc((void **)&d_v2, N*sizeof(vec4d));
+  ERRCHECK(err);
 
   // Allocate the device output vector C
   arithmetic_type* d_invMasses = NULL;
-  err = cudaMalloc((void **)&d_invMasses, sizeVec);
+  err = cudaMalloc((void **)&d_invMasses, N*sizeof(arithmetic_type));
+  ERRCHECK(err);
 
-  cudaMemcpy ( d_v1, v1, sizeVec, cudaMemcpyHostToDevice );
-  cudaMemcpy ( d_v2, v2, sizeVec, cudaMemcpyHostToDevice );
+  cudaMemcpy ( d_v1, v1, N*sizeof(vec4d), cudaMemcpyHostToDevice );
+  cudaMemcpy ( d_v2, v2, N*sizeof(vec4d), cudaMemcpyHostToDevice );
 
-  InvariantMassesKernel<<<fmax(1, N / local_size), local_size>>>(d_v1, d_v2, d_invMasses, N);
-
-  cudaMemcpy ( invMasses, d_invMasses, sizeVec, cudaMemcpyDeviceToHost );
+  InvariantMassesKernel<<< N / local_size + 1, local_size>>>(d_v1, d_v2, d_invMasses, N);
+  
+  cudaDeviceSynchronize();
+  ERRCHECK(cudaMemcpy ( invMasses, d_invMasses,  N*sizeof(arithmetic_type), cudaMemcpyDeviceToHost ));
  
 
-  cudaFree(d_v1);
-  cudaFree(d_v2);
-  cudaFree(d_invMasses);
+  ERRCHECK(cudaFree(d_v1));
+  ERRCHECK(cudaFree(d_v2));
+  ERRCHECK(cudaFree(d_invMasses));
 
 }
  
@@ -96,6 +107,7 @@ arithmetic_type* InvariantMass(vec4d* v1, const size_t N, const size_t local_siz
 {
 
   arithmetic_type* invMasses = new arithmetic_type[N];
+  std::cout << "Blocksize " << fmax(1, N / local_size) << std::endl;
 
   size_t sizeVec = N*sizeof(vec4d);
   auto start = std::chrono::system_clock::now();
@@ -149,6 +161,13 @@ vec4d* GenVectors(int n)
   return vectors;
 }
 
+bool print_if_false(const bool assertion, size_t i) {
+  if (!assertion) {
+    std::cout << "Assertion failed at index "<< i << std::endl;
+  }
+  return assertion;
+}
+
 int main(int argc, char **argv)
 {
 
@@ -163,10 +182,9 @@ int main(int argc, char **argv)
 
   arithmetic_type* masses = InvariantMasses(u_vectors, v_vectors, N, local_size);
 
-//InvariantMass(u_vectors, N, local_size);
-  //    InvariantMasses(u_vectors, v_vectors, N, local_size);
+  for (size_t i=0; i<N; i++)
+    assert(print_if_false((std::abs(masses[i] - 2.) <= 1e-5), i) );
 
-  //std::cout << "masses[0] " << masses[5] << std::endl;
-  assert((std::abs(masses[0] - 2.) <= 1e-5));
+  delete[] masses;
   return 0;
 }
