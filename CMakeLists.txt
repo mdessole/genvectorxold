@@ -1,4 +1,4 @@
-project(genvectorx)
+project(genvectorx )
 
 cmake_minimum_required(VERSION 3.9)
 
@@ -212,9 +212,20 @@ FORCE)
 endif()
 
 if (cuda)
+  include(CheckLanguage)
+  check_language(CUDA)
+  if (CMAKE_CUDA_COMPILER)
+    enable_language(CUDA)
+  else()
+    message(FATAL_ERROR "CUDA library not found")
+  endif()
+endif()
+
+if (cuda)
   add_library(SYCLMath SHARED
-  src/MathUtil.cu
+  src/MathUtil.cxx
   )
+  set_source_files_properties(src/MathUtil.cxx PROPERTIES LANGUAGE CUDA)
   target_compile_options(SYCLMath PRIVATE -rdc=true -lineinfo --expt-relaxed-constexpr)
   set_target_properties(SYCLMath PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
   target_compile_definitions(SYCLMath INTERFACE ROOT_MATH_CUDA)
@@ -222,9 +233,9 @@ else()
   add_library(SYCLMath SHARED
   src/MathUtil.cxx
   )
+  set_target_properties(SYCLMath PROPERTIES LINKER_LANGUAGE CXX)
 endif()
 
-set_target_properties(SYCLMath PROPERTIES LINKER_LANGUAGE CXX)
 
 
 if (opensycl)

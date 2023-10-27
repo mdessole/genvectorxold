@@ -14,11 +14,6 @@ if (opensycl)
   add_sycl_to_root_target(TARGET RVecSYCL SOURCES RVecSYCL.cxx DEPENDENCIES GenVectorX SYCLMath INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc COMPILE_DEFINITIONS ROOT_MATH_SYCL)
 endif()
 
-if ( (NOT oneapi) AND (NOT opensycl) )
-  add_executable(Coords Coords.cpp) 
-  target_link_libraries(Coords PUBLIC GenVectorX SYCLMath)
-endif()
-
 
 if (cuda)
   add_executable(RVecCUDA RVecCUDA.cu)
@@ -28,5 +23,10 @@ if (cuda)
   target_compile_definitions(RVecCUDA INTERFACE ROOT_MATH_CUDA)
 endif()
 
+
+if ( (NOT oneapi) AND (NOT opensycl) AND (NOT cuda) )
+  add_executable(Coords Coords.cpp) 
+  target_link_libraries(Coords PUBLIC GenVectorX SYCLMath)
+endif()
 #add_executable(RVec RVec.cpp)
 #target_compile_options(RVec PUBLIC `root-config --libs --cflags`)

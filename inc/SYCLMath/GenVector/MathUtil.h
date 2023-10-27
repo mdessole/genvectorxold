@@ -48,7 +48,7 @@
 #define __roohost__ __host__
 #define __rooglobal__ __global__
 
-#elif
+#else
 
 #define __roodevice__ 
 #define __roohost__ 
