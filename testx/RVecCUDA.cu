@@ -107,7 +107,6 @@ arithmetic_type* InvariantMass(vec4d* v1, const size_t N, const size_t local_siz
 {
 
   arithmetic_type* invMasses = new arithmetic_type[N];
-  std::cout << "Blocksize " << fmax(1, N / local_size) << std::endl;
 
   size_t sizeVec = N*sizeof(vec4d);
   auto start = std::chrono::system_clock::now();
@@ -126,7 +125,7 @@ arithmetic_type* InvariantMass(vec4d* v1, const size_t N, const size_t local_siz
   cudaMemcpy ( d_v1, v1, sizeVec, cudaMemcpyHostToDevice );
 
 
-  InvariantMassKernel<<<fmax(1, N / local_size), local_size>>>(d_v1, d_invMasses, N);
+  InvariantMassKernel<<< N / local_size + 1, local_size>>>(d_v1, d_invMasses, N);
 
   cudaMemcpy ( invMasses, d_invMasses, sizeVec, cudaMemcpyDeviceToHost );
  

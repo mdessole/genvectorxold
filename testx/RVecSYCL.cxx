@@ -161,6 +161,14 @@ Vector<vec4d> GenVectors(int n) {
   return vectors;
 }
 
+bool print_if_false(const bool assertion, size_t i) {
+  if (!assertion) {
+    std::cout << "Assertion failed at index "<< i << std::endl;
+  }
+  return assertion;
+}
+
+
 int main(int argc, char **argv) {
 
   std::string arg1 = argv[1];
@@ -176,6 +184,8 @@ int main(int argc, char **argv) {
   Vector<arithmetic_type> masses =
       InvariantMasses(u_vectors, v_vectors, N, local_size, queue);
 
-  assert((std::abs(masses[0] - 2.) <= 1e-5));
+  for (size_t i=0; i<N; i++)
+    assert(print_if_false((std::abs(masses[i] - 2.) <= 1e-5), i) );
+
   return 0;
 }
