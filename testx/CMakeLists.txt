@@ -23,6 +23,8 @@ if (cuda)
   target_compile_definitions(RVecCUDA INTERFACE ROOT_MATH_CUDA)
 endif()
 
+add_executable(RVec RVec.cxx)
+target_link_libraries(RVec PUBLIC ROOT::MathCore ROOT::ROOTVecOps)
 
 if ( (NOT oneapi) AND (NOT opensycl) AND (NOT cuda) )
   add_executable(Coords Coords.cpp) 
