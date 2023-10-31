@@ -20,7 +20,7 @@ if (cuda)
   set_target_properties(InvariantMassesCUDA PROPERTIES LINKER_LANGUAGE CUDA)
   target_compile_options(InvariantMassesCUDA PRIVATE -rdc=true -lineinfo --expt-relaxed-constexpr)
   set_target_properties(InvariantMassesCUDA PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-  target_compile_definitions(InvariantMassesCUDA INTERFACE ROOT_MATH_CUDA)
+  target_compile_definitions(InvariantMassesCUDA PUBLIC ROOT_MATH_CUDA)
 endif()
 
 add_executable(InvariantMasses InvariantMasses.cxx)

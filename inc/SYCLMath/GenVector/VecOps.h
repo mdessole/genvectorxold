@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <chrono>
 
+
 #if defined(ROOT_MATH_SYCL)
 #include <sycl/sycl.hpp>
 using mode = sycl::access::mode;
