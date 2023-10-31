@@ -237,14 +237,7 @@ else()
 endif()
 
 
-
-if (opensycl)
-    #set_target_properties(GenVector PROPERTIES LINKER_LANGUAGE CXX)
-    target_compile_definitions(SYCLMath PUBLIC ROOT_MATH_SYCL)
-    add_sycl_to_root_target(TARGET SYCLMath HEADERS inc/SYCLMath/GenVector/MathUtil.h)
-endif()
-
-if (oneapi)
+if (sycl)
     #set_target_properties(GenVector PROPERTIES LINKER_LANGUAGE CXX)
     target_compile_definitions(SYCLMath PUBLIC ROOT_MATH_SYCL)
     add_sycl_to_root_target(TARGET SYCLMath SOURCES src/MathUtil.cxx HEADERS inc/SYCLMath/GenVector/MathUtil.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc/)
@@ -384,7 +377,7 @@ endif()
 if (sycl)
     set_target_properties(VecOps PROPERTIES LINKER_LANGUAGE CXX)
     target_compile_definitions(VecOps PUBLIC ROOT_MATH_SYCL)
-    add_sycl_to_root_target(TARGET VecOps SOURCES src/VecOps.cxx HEADERS inc/SYCLMath/VecOps.h)
+    add_sycl_to_root_target(TARGET VecOps SOURCES src/VecOps.cxx HEADERS inc/SYCLMath/VecOps.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc/)
 endif()
 
 install(TARGETS GenVectorX SYCLMath VecOps
