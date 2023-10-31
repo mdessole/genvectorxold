@@ -23,6 +23,8 @@ if (cuda)
   target_compile_definitions(InvariantMassesCUDA INTERFACE ROOT_MATH_CUDA)
 endif()
 
+add_executable(InvariantMasses InvariantMasses.cxx)
+target_link_libraries(InvariantMasses PUBLIC ROOT::MathCore ROOT::ROOTVecOps)
 
 if ( (NOT oneapi) AND (NOT opensycl) AND (NOT cuda) )
   add_executable(Coords Coords.cpp) 

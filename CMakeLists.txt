@@ -2,6 +2,17 @@ project(genvectorx )
 
 cmake_minimum_required(VERSION 3.9)
 
+find_package(ROOT REQUIRED COMPONENTS MathCore ROOTVecOps)
+if (ROOT_FOUND)
+  message(STATUS "ROOT library found")
+  #message(STATUS "ROOT_INCLUDE_DIRS: ${ROOT_INCLUDE_DIRS}")
+  #message(STATUS "ROOT_LIBRARIES: ${ROOT_LIBRARIES}")
+  #message(STATUS "ROOT_CXX_FLAGS: ${ROOT_CXX_FLAGS}")
+  #message(STATUS "ROOT_INCLUDE_DIRS: ${ROOT_INCLUDE_DIRS}")
+else()
+  message(FATAL_ERROR "ROOT library not found")
+endif()
+
 include_directories(${CMAKE_SOURCE_DIR}/inc)
 
 if (oneapi)
@@ -237,14 +248,7 @@ else()
 endif()
 
 
-
-if (opensycl)
-    #set_target_properties(GenVector PROPERTIES LINKER_LANGUAGE CXX)
-    target_compile_definitions(SYCLMath PUBLIC ROOT_MATH_SYCL)
-    add_sycl_to_root_target(TARGET SYCLMath HEADERS inc/SYCLMath/GenVector/MathUtil.h)
-endif()
-
-if (oneapi)
+if (sycl)
     #set_target_properties(GenVector PROPERTIES LINKER_LANGUAGE CXX)
     target_compile_definitions(SYCLMath PUBLIC ROOT_MATH_SYCL)
     add_sycl_to_root_target(TARGET SYCLMath SOURCES src/MathUtil.cxx HEADERS inc/SYCLMath/GenVector/MathUtil.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc/)
@@ -369,10 +373,32 @@ set_target_properties(GenVectorX PROPERTIES LINKER_LANGUAGE CXX)
 
 target_link_libraries(GenVectorX PUBLIC SYCLMath)
 
-install(TARGETS GenVectorX SYCLMath
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+if ((cuda) OR (sycl))
+  add_library(VecOps SHARED
+   src/VecOps.cxx
+   )
+  target_link_libraries(VecOps PUBLIC GenVectorX SYCLMath)
+
+  if (cuda)
+    set_source_files_properties(src/VecOps.cxx PROPERTIES LANGUAGE CUDA)
+    target_compile_options(VecOps PRIVATE -rdc=true -lineinfo --expt-relaxed-constexpr)
+    set_target_properties(VecOps PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+    target_compile_definitions(VecOps INTERFACE ROOT_MATH_CUDA)
+  endif()
+  if (sycl)
+      set_target_properties(VecOps PROPERTIES LINKER_LANGUAGE CXX)
+      target_compile_definitions(VecOps PUBLIC ROOT_MATH_SYCL)
+      add_sycl_to_root_target(TARGET VecOps SOURCES src/VecOps.cxx HEADERS inc/SYCLMath/VecOps.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc/)
+  endif()
+
+  install(TARGETS GenVectorX SYCLMath VecOps
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}   )
+else()
+  install(TARGETS GenVectorX SYCLMath 
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}   )
+endif()
 
 if (testing)
  add_subdirectory(testx)
