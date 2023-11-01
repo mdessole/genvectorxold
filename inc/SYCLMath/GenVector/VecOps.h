@@ -1,6 +1,7 @@
 #include "SYCLMath/GenVector/MathUtil.h"
 #include <cstdio>
 #include <chrono>
+#include <iostream>
 
 
 #if defined(ROOT_MATH_SYCL)

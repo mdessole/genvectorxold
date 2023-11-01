@@ -55,6 +55,11 @@ if (oneapi)
 
     function(add_sycl_to_root_target_exe)
       CMAKE_PARSE_ARGUMENTS(ARG "" "TARGET" "SOURCES;HEADERS;DEPENDENCIES;INCLUDE_DIRECTORIES;COMPILE_DEFINITIONS" ${ARGN})
+  
+      foreach(lib ${ARG_DEPENDENCIES})
+        list(APPEND _lib_dep_paths "$<TARGET_FILE:${lib}>")
+      endforeach()
+      
       # Get include directories for the SYCL target
       set(_inc_dirs ${ARG_INCLUDE_DIRECTORIES})
       if (_inc_dirs)
@@ -65,7 +70,6 @@ if (oneapi)
       foreach(comp_def ${ARG_COMPILE_DEFINITIONS})
         list(APPEND _COMPILE_DEFINITIONS -D${comp_def})
       endforeach()
-      list(JOIN _COMPILE_DEFINITIONS " " _COMPILE_DEFINITIONS)
       message(STATUS "_COMPILE_DEFINITIONS ${_COMPILE_DEFINITIONS}")
 
       # Compile the sycl source files with the found sycl compiler
@@ -76,8 +80,11 @@ if (oneapi)
         list(APPEND _outputs ${_output_path})
 
         add_custom_command(OUTPUT ${_output_path}
-                            COMMAND ${SYCL_COMPILER}  ${SYCL_COMPILER_FLAGS} -c
-                                    ${_inc_dirs} ${_COMPILE_DEFINITIONS}
+                            COMMAND ${SYCL_COMPILER} 
+                                    ${SYCL_COMPILER_FLAGS} -c
+                                    ${_inc_dirs}
+                                    ${_COMPILE_DEFINITIONS}
+                                    ${_lib_dep_paths}
                                     -o ${_output_path}
                                     ${CMAKE_CURRENT_SOURCE_DIR}/${src}
                             DEPENDS ${ARG_DEPENDENCIES}
@@ -86,15 +93,24 @@ if (oneapi)
                             )
       endforeach()
 
+      #foreach(lib ${ARG_DEPENDENCIES})
+      #  list(APPEND _lib_dep_paths "-l${lib}")
+      #endforeach()
+
       set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${_outputs})               
       set_property(TARGET ${ARG_TARGET} PROPERTY SOURCES ${_outputs})               
       target_include_directories(${ARG_TARGET} PUBLIC ${SYCL_INCLUDE_DIR} ${SYCL_INCLUDE_DIR}/sycl)
       target_link_directories(${ARG_TARGET} PUBLIC ${SYCL_LIB_DIR})
-      target_link_libraries(${ARG_TARGET} INTERFACE sycl)
-      #target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
+      target_link_libraries(${ARG_TARGET} INTERFACE ${ARG_DEPENDENCIES})
+      target_link_libraries(${ARG_TARGET} PUBLIC sycl)
+      target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
       add_custom_command(TARGET ${ARG_TARGET}
-                            COMMAND ${SYCL_COMPILER}  ${SYCL_COMPILER_FLAGS}
-                                    ${_inc_dirs} ${_COMPILE_DEFINITIONS} -L${SYCL_LIB_DIR} -lsycl
+                            COMMAND ${SYCL_COMPILER} 
+                                    ${SYCL_COMPILER_FLAGS}
+                                    ${_inc_dirs}
+                                    -L${SYCL_LIB_DIR} -lsycl
+                                    ${_lib_dep_paths}
+                                    ${_COMPILE_DEFINITIONS}
                                     -o ${ARG_TARGET} ${_outputs} 
                             DEPENDS ${ARG_DEPENDENCIES}
                             COMMENT "Building SYCL executable ${ARG_TARGET}"
@@ -116,7 +132,6 @@ if (oneapi)
       foreach(comp_def ${ARG_COMPILE_DEFINITIONS})
         list(APPEND _COMPILE_DEFINITIONS -D${comp_def})
       endforeach()
-      list(JOIN _COMPILE_DEFINITIONS " " _COMPILE_DEFINITIONS)
       message(STATUS "_COMPILE_DEFINITIONS ${_COMPILE_DEFINITIONS}")
 
       # Compile the sycl source files with the found sycl compiler
@@ -126,8 +141,10 @@ if (oneapi)
         list(APPEND _outputs ${_output_path})
 
         add_custom_command(OUTPUT ${_output_path}
-                            COMMAND ${SYCL_COMPILER}  ${SYCL_COMPILER_FLAGS} -c
-                                    ${_inc_dirs} ${_COMPILE_DEFINITIONS}
+                            COMMAND ${SYCL_COMPILER}
+                                    ${SYCL_COMPILER_FLAGS} -c
+                                    ${_inc_dirs} 
+                                    ${_COMPILE_DEFINITIONS}
                                     -o ${_output_path}
                                     ${CMAKE_CURRENT_SOURCE_DIR}/${src}
                             DEPENDS ${ARG_DEPENDENCIES}
@@ -147,10 +164,12 @@ if (oneapi)
       list(APPEND _inc_dirs ${SYCL_INCLUDE_DIR}/sycl)
       
       add_custom_command(OUTPUT ${ARG_TARGET}
-                          COMMAND ${SYCL_COMPILER}  ${SYCL_LINKER_FLAGS}
+                          COMMAND ${SYCL_COMPILER}
+                                  ${SYCL_LINKER_FLAGS}
+                                  ${_lib_dep_paths} ${_inc_dirs}
+                                  ${_COMPILE_DEFINITIONS} 
                                   -o $<TARGET_FILE:${ARG_TARGET}>
-                                  ${_outputs} ${_lib_dep_paths} ${_inc_dirs}
-                                  ${_COMPILE_DEFINITIONS}
+                                  ${_outputs}
                           DEPENDS ${ARG_DEPENDENCIES} ${_outputs} ${_sycl_target}
                           COMMENT "Linking shared library ${ARG_TARGET}"
                           MAIN_DEPENDENCY ${_outputs}
@@ -162,7 +181,7 @@ if (oneapi)
       target_include_directories(${ARG_TARGET} PUBLIC ${SYCL_INCLUDE_DIR} ${SYCL_INCLUDE_DIR}/sycl)
       target_link_directories(${ARG_TARGET} PUBLIC ${SYCL_LIB_DIR})
       target_link_libraries(${ARG_TARGET} INTERFACE sycl)
-      #target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
+      target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
 
    endfunction()
 
