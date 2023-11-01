@@ -5,8 +5,12 @@
 // For the CUDA runtime routines (prefixed with "cuda_")
 #include <cuda_runtime.h>
 
-
+#ifdef SINGLE_PRECISION
+using arithmetic_type = float;
+#else
 using arithmetic_type = double;
+#endif
+
 using vec4d = ROOT::Experimental::LorentzVector<
     ROOT::Experimental::PtEtaPhiM4D<arithmetic_type>>;
 template <class T>

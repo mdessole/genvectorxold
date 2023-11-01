@@ -5,7 +5,12 @@
 #include <chrono>
 #include <vector>
 
+#ifdef SINGLE_PRECISION
+using arithmetic_type = float;
+#else
 using arithmetic_type = double;
+#endif
+
 using vec4d =
     ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<arithmetic_type>>;
 

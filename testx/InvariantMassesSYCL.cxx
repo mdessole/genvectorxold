@@ -3,7 +3,12 @@
 #include <chrono>
 #include <sycl/sycl.hpp>
 
+#ifdef SINGLE_PRECISION
+using arithmetic_type = float;
+#else
 using arithmetic_type = double;
+#endif
+
 using vec4d = ROOT::Experimental::LorentzVector<
     ROOT::Experimental::PtEtaPhiM4D<arithmetic_type>>;
 template <class T>
@@ -43,7 +48,18 @@ int main(int argc, char **argv)
   auto u_vectors = GenVectors(N);
   auto v_vectors = GenVectors(N);
 
-  static sycl::queue queue{sycl::default_selector{}};
+#ifdef ROOT_MEAS_TIMING
+      std::cout<< "ROOT_MEAS_TIMING defined \n"; 
+#endif
+#ifdef ROOT_MATH_SYCL
+      std::cout<< "ROOT_MATH_SYCL defined \n"; 
+#endif
+#ifdef SINGLE_PRECISION
+      std::cout<< "SINGLE_PRECISION defined \n"; 
+#endif
+
+
+  static sycl::queue queue{sycl::default_selector_v};
 
   auto masses =
       ROOT::Experimental::InvariantMasses<arithmetic_type, vec4d>(u_vectors, v_vectors, N, local_size, queue);
