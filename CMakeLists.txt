@@ -113,6 +113,12 @@ if (oneapi)
         list(TRANSFORM _inc_dirs PREPEND -I)
       endif()
 
+      foreach(comp_def ${ARG_COMPILE_DEFINITIONS})
+        list(APPEND _COMPILE_DEFINITIONS -D${comp_def})
+      endforeach()
+      list(JOIN _COMPILE_DEFINITIONS " " _COMPILE_DEFINITIONS)
+      message(STATUS "_COMPILE_DEFINITIONS ${_COMPILE_DEFINITIONS}")
+
       # Compile the sycl source files with the found sycl compiler
       separate_arguments(SYCL_COMPILER_FLAGS NATIVE_COMMAND ${SYCL_COMPILER_FLAGS})
       foreach(src ${ARG_SOURCES})
@@ -121,7 +127,7 @@ if (oneapi)
 
         add_custom_command(OUTPUT ${_output_path}
                             COMMAND ${SYCL_COMPILER}  ${SYCL_COMPILER_FLAGS} -c
-                                    ${_inc_dirs} -D${ARG_COMPILE_DEFINITIONS}
+                                    ${_inc_dirs} ${_COMPILE_DEFINITIONS}
                                     -o ${_output_path}
                                     ${CMAKE_CURRENT_SOURCE_DIR}/${src}
                             DEPENDS ${ARG_DEPENDENCIES}
@@ -144,7 +150,7 @@ if (oneapi)
                           COMMAND ${SYCL_COMPILER}  ${SYCL_LINKER_FLAGS}
                                   -o $<TARGET_FILE:${ARG_TARGET}>
                                   ${_outputs} ${_lib_dep_paths} ${_inc_dirs}
-                                  -D${ARG_COMPILE_DEFINITIONS}
+                                  ${_COMPILE_DEFINITIONS}
                           DEPENDS ${ARG_DEPENDENCIES} ${_outputs} ${_sycl_target}
                           COMMENT "Linking shared library ${ARG_TARGET}"
                           MAIN_DEPENDENCY ${_outputs}
@@ -251,7 +257,7 @@ endif()
 if (sycl)
     #set_target_properties(GenVector PROPERTIES LINKER_LANGUAGE CXX)
     target_compile_definitions(SYCLMath PUBLIC ROOT_MATH_SYCL)
-    add_sycl_to_root_target(TARGET SYCLMath SOURCES src/MathUtil.cxx HEADERS inc/SYCLMath/GenVector/MathUtil.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc/)
+    add_sycl_to_root_target(TARGET SYCLMath SOURCES src/MathUtil.cxx HEADERS inc/SYCLMath/GenVector/MathUtil.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc/ COMPILE_DEFINITIONS ROOT_MATH_SYCL ROOT_MEAS_TIMING )
 endif()
 
 
@@ -383,12 +389,12 @@ if ((cuda) OR (sycl))
     set_source_files_properties(src/VecOps.cxx PROPERTIES LANGUAGE CUDA)
     target_compile_options(VecOps PRIVATE -rdc=true -lineinfo --expt-relaxed-constexpr)
     set_target_properties(VecOps PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-    target_compile_definitions(VecOps PUBLIC ROOT_MATH_CUDA)
+    target_compile_definitions(VecOps PUBLIC ROOT_MATH_CUDA ROOT_MEAS_TIMING)
   endif()
   if (sycl)
       set_target_properties(VecOps PROPERTIES LINKER_LANGUAGE CXX)
-      target_compile_definitions(VecOps PUBLIC ROOT_MATH_SYCL)
-      add_sycl_to_root_target(TARGET VecOps SOURCES src/VecOps.cxx HEADERS inc/SYCLMath/VecOps.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc/)
+      #target_compile_definitions(VecOps PUBLIC ROOT_MATH_SYCL)
+      add_sycl_to_root_target(TARGET VecOps SOURCES src/VecOps.cxx HEADERS inc/SYCLMath/VecOps.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc/ COMPILE_DEFINITIONS ROOT_MATH_SYCL ROOT_MEAS_TIMING )
   endif()
 
   install(TARGETS GenVectorX SYCLMath VecOps
