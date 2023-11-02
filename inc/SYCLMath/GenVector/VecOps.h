@@ -85,7 +85,6 @@ namespace ROOT
 
         InvariantMassesKernel<<<N / local_size + 1, local_size>>>(d_v1, d_v2, d_invMasses, N);
 
-        cudaDeviceSynchronize();
         ERRCHECK(cudaMemcpy(invMasses, d_invMasses, N * sizeof(Scalar), cudaMemcpyDeviceToHost));
 
         ERRCHECK(cudaFree(d_v1));

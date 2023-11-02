@@ -55,7 +55,11 @@ int main(int argc, char **argv)
 #ifdef SINGLE_PRECISION
       std::cout<< "SINGLE_PRECISION defined \n"; 
 #endif
-
+  int count;
+  cudaGetDeviceCount(&count); 
+  std::cout << "CUDA available devices: " << count << std::endl;
+  cudaSetDevice(0);
+  //cudaInitDevice(0,);
 
   std::string arg1 = argv[1];
   std::size_t pos;
