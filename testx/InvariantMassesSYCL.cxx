@@ -54,6 +54,9 @@ int main(int argc, char **argv)
 #ifdef ROOT_MATH_SYCL
       std::cout<< "ROOT_MATH_SYCL defined \n"; 
 #endif
+#ifdef ROOT_MATH_CUDA
+      std::cout<< "ROOT_MATH_CUDA defined \n"; 
+#endif
 #ifdef SINGLE_PRECISION
       std::cout<< "SINGLE_PRECISION defined \n"; 
 #endif
