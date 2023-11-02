@@ -384,7 +384,7 @@ endif()
 if (sycl)
     set_target_properties(VecOps PROPERTIES LINKER_LANGUAGE CXX)
     target_compile_definitions(VecOps PUBLIC ROOT_MATH_SYCL)
-    add_sycl_to_root_target(TARGET VecOps SOURCES src/VecOps.cxx HEADERS inc/SYCLMath/VecOps.h)
+    add_sycl_to_root_target(TARGET VecOps SOURCES src/VecOps.cxx HEADERS inc/SYCLMath/VecOps.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc)
 endif()
 
 install(TARGETS GenVectorX SYCLMath VecOps

@@ -1,6 +1,11 @@
 #include "SYCLMath/GenVector/MathUtil.h"
 #include <cstdio>
 #include <chrono>
+#include <iostream>
+
+#ifndef ROOT_MEAS_TIMING
+#define ROOT_MEAS_TIMING
+#endif
 
 #if defined(ROOT_MATH_SYCL)
 #include <sycl/sycl.hpp>

@@ -20,7 +20,7 @@ if (cuda)
   set_target_properties(RVecCUDA PROPERTIES LINKER_LANGUAGE CUDA)
   target_compile_options(RVecCUDA PRIVATE -rdc=true -lineinfo --expt-relaxed-constexpr)
   set_target_properties(RVecCUDA PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-  target_compile_definitions(RVecCUDA INTERFACE ROOT_MATH_CUDA)
+  target_compile_definitions(RVecCUDA PUBLIC ROOT_MATH_CUDA)
 endif()
 
 
