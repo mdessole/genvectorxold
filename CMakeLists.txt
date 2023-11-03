@@ -87,14 +87,12 @@ if (oneapi)
         list(APPEND SYCL_LINKER_FLAGS ":$<TARGET_FILE_DIR:${lib}>")
       endforeach()
       string(REPLACE ";" "" SYCL_LINKER_FLAGS ${SYCL_LINKER_FLAGS})
-      #message(STATUS "_lib_paths: ${_lib_paths}")
-      #message(STATUS "__lib_paths: ${__lib_paths}")
-      #set(SYCL_LINKER_FLAGS "-L${SYCL_LIB_DIR}  -Wl,-rpath,${SYCL_LIB_DIR}:$<TARGET_FILE_DIR:${ARG_TARGET}>")
-      message(STATUS "SYCL linker flags: ${SYCL_LINKER_FLAGS}")
+    
       separate_arguments(SYCL_LINKER_FLAGS NATIVE_COMMAND ${SYCL_LINKER_FLAGS})
       set_target_properties(${ARG_TARGET} PROPERTIES LINKER_LANGUAGE CXX)
 
       set_property(TARGET ${ARG_TARGET} PROPERTY SOURCES ${_outputs})  
+      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${ARG_DEPENDENCIES})
 
       add_custom_command(TARGET ${ARG_TARGET}
                             COMMAND ${SYCL_COMPILER} 
@@ -152,7 +150,10 @@ if (oneapi)
 
       set(SYCL_LINKER_FLAGS "-shared -Wl,-soname,$<TARGET_FILE:${_library_name}> -L${SYCL_LIB_DIR} ${CMAKE_SHARED_LINKER_FLAGS} -Wl,-rpath,${SYCL_LIB_DIR}:$<TARGET_FILE_DIR:${_library_name}>")
       separate_arguments(SYCL_LINKER_FLAGS NATIVE_COMMAND ${SYCL_LINKER_FLAGS})
-      
+      message(STATUS "SYCL linker flags: ${SYCL_LINKER_FLAGS}")
+      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${_outputs})
+      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${ARG_DEPENDENCIES})
+
       add_custom_command(OUTPUT ${ARG_TARGET}
                           COMMAND ${SYCL_COMPILER}
                                   ${SYCL_LINKER_FLAGS}
@@ -161,17 +162,10 @@ if (oneapi)
                                   -o  $<TARGET_FILE:${_library_name}>
                                   ${_outputs}
                           DEPENDS ${ARG_DEPENDENCIES} ${_outputs} 
-                          COMMENT "Linking shared library ${ARG_TARGET}"
+                          COMMENT "Linking shared library ${_library_name}"
                           MAIN_DEPENDENCY ${_outputs}
                           )
 
-      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${_outputs})
-      set_property(TARGET ${ARG_TARGET} PROPERTY SOURCES ${_outputs})  
-      set_target_properties(${ARG_TARGET} PROPERTIES LINKER_LANGUAGE CXX)
-      target_include_directories(${ARG_TARGET} PUBLIC ${SYCL_INCLUDE_DIR} ${SYCL_INCLUDE_DIR}/sycl)
-      target_link_directories(${ARG_TARGET} PUBLIC ${SYCL_LIB_DIR})
-      target_link_libraries(${ARG_TARGET} INTERFACE sycl)
-      target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
 
    endfunction()
 
@@ -403,7 +397,7 @@ if ((cuda) OR (sycl))
   if (sycl)
       set_target_properties(VecOps PROPERTIES LINKER_LANGUAGE CXX)
       #target_compile_definitions(VecOps PUBLIC ROOT_MATH_SYCL)
-      add_sycl_to_root_target(TARGET VecOps SOURCES src/VecOps.cxx HEADERS inc/SYCLMath/VecOps.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc/ COMPILE_DEFINITIONS ROOT_MATH_SYCL ROOT_MEAS_TIMING )
+      add_sycl_to_root_target(TARGET VecOps SOURCES src/VecOps.cxx HEADERS inc/SYCLMath/VecOps.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc/ DEPENDENCIES GenVectorX SYCLMath COMPILE_DEFINITIONS ROOT_MATH_SYCL ROOT_MEAS_TIMING )
   endif()
 
   install(TARGETS GenVectorX SYCLMath VecOps
