@@ -1,4 +1,5 @@
 #include "ROOT/RVec.hxx"
+#include "TROOT.h"
 #include "Math/PtEtaPhiM4D.h"
 #include "Math/Vector4D.h"
 #include <assert.h>
@@ -65,7 +66,8 @@ int main(int argc, char **argv) {
 #ifdef SINGLE_PRECISION
       std::cout<< "SINGLE_PRECISION defined \n"; 
 #endif
-
+  
+  ROOT::EnableImplicitMT();
 
   std::string arg1 = argv[1];
   std::size_t pos;

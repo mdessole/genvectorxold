@@ -15,6 +15,8 @@ endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/inc)
 
+string(TOUPPER "${CMAKE_BUILD_TYPE}" _BUILD_TYPE_UPPER)
+
 if (oneapi)
    SET(_sycl_search_dirs ${SYCL_ROOT_DIR} /usr/lib /usr/local/lib /opt/intel/oneapi/compiler/latest/linux)
    find_program(SYCL_COMPILER
@@ -30,25 +32,17 @@ if (oneapi)
              HINTS ${_sycl_search_dirs}
              PATH_SUFFIXES lib)
 
-    set(SYCL_COMPILER_FLAGS "-fsycl -fsycl-unnamed-lambda -sycl-std=2020 -fPIC")
-    if (sycl_targets)
-      list(APPEND SYCL_COMPILER_FLAGS "-fsycl-targets=${sycl_targets}")   
+    
+
+    if (syclcuda)
+      set(_fsycl_targets "-fsycl-targets=nvptx64-nvidia-cuda,spir64_x86_64,spir64 -Xsycl-target-backend=nvptx64-nvidia-cuda --cuda-gpu-arch=sm_${CMAKE_CUDA_ARCHITECTURES} --cuda-path=${CUDA_TOOLKIT_ROOT_DIR}")
+    else()
+        set(_fsycl_targets "-fsycl-targets=spir64_x86_64,spir64")
     endif()
-    if (sycl_target_backend)
-      list(APPEND SYCL_COMPILER_FLAGS "-Xsycl-target-backend=${sycl_target_backend}")   
-    endif()
-    if (offload_arch)
-      list(APPEND SYCL_COMPILER_FLAGS "--offload-arch=${offload_arch}")   
-    endif()
-    if (gpu_arch)
-      list(APPEND SYCL_COMPILER_FLAGS "--gpu-arch=${gpu_arch}")   
-    endif()
-    list(APPEND SYCL_COMPILER_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${_BUILD_TYPE_UPPER}}")
-    list(JOIN SYCL_COMPILER_FLAGS " " SYCL_COMPILER_FLAGS)
-    message(STATUS "SYCL flags: ${SYCL_COMPILER_FLAGS}")
-    message(STATUS "SYCL_COMPILER: ${SYCL_COMPILER}")
-    message(STATUS "SYCL_INCLUDE_DIR: ${SYCL_INCLUDE_DIR}")
-    message(STATUS "SYCL_LIB_DIR: ${SYCL_LIB_DIR}")
+
+    set(SYCL_COMPILER_FLAGS "-fPIC -fsycl -fsycl-unnamed-lambda -sycl-std=2020 ${_fsycl_targets} ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${_BUILD_TYPE_UPPER}}")
+    message(STATUS "SYCL compiler flags: ${SYCL_COMPILER_FLAGS}")
+    separate_arguments(SYCL_COMPILER_FLAGS NATIVE_COMMAND ${SYCL_COMPILER_FLAGS})
 
     if (SYCL_COMPILER)
       set(sycl ON)
@@ -73,18 +67,15 @@ if (oneapi)
       message(STATUS "_COMPILE_DEFINITIONS ${_COMPILE_DEFINITIONS}")
 
       # Compile the sycl source files with the found sycl compiler
-      separate_arguments(SYCL_COMPILER_FLAGS NATIVE_COMMAND ${SYCL_COMPILER_FLAGS})
-      message(STATUS "SYCL_COMPILER_FLAGS ${SYCL_COMPILER_FLAGS}")
       foreach(src ${ARG_SOURCES})
         set(_output_path ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${ARG_TARGET}.dir/${src}${CMAKE_CXX_OUTPUT_EXTENSION})
         list(APPEND _outputs ${_output_path})
 
         add_custom_command(OUTPUT ${_output_path}
-                            COMMAND ${SYCL_COMPILER} 
+                            COMMAND ${SYCL_COMPILER}
                                     ${SYCL_COMPILER_FLAGS} -c
                                     ${_inc_dirs}
                                     ${_COMPILE_DEFINITIONS}
-                                    ${_lib_dep_paths}
                                     -o ${_output_path}
                                     ${CMAKE_CURRENT_SOURCE_DIR}/${src}
                             DEPENDS ${ARG_DEPENDENCIES}
@@ -93,17 +84,11 @@ if (oneapi)
                             )
       endforeach()
 
-      #foreach(lib ${ARG_DEPENDENCIES})
-      #  list(APPEND _lib_dep_paths "-l${lib}")
-      #endforeach()
 
-      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${_outputs})               
-      set_property(TARGET ${ARG_TARGET} PROPERTY SOURCES ${_outputs})               
-      target_include_directories(${ARG_TARGET} PUBLIC ${SYCL_INCLUDE_DIR} ${SYCL_INCLUDE_DIR}/sycl)
-      target_link_directories(${ARG_TARGET} PUBLIC ${SYCL_LIB_DIR})
-      target_link_libraries(${ARG_TARGET} INTERFACE ${ARG_DEPENDENCIES})
-      target_link_libraries(${ARG_TARGET} PUBLIC sycl)
-      target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
+      set(SYCL_LINKER_FLAGS "-L${SYCL_LIB_DIR}  -Wl,-rpath,${SYCL_LIB_DIR}:$<TARGET_FILE_DIR:${ARG_TARGET}>")
+      message(STATUS "SYCL linker flags: ${SYCL_LINKER_FLAGS}")
+      separate_arguments(SYCL_LINKER_FLAGS NATIVE_COMMAND ${SYCL_LINKER_FLAGS})
+
       add_custom_command(TARGET ${ARG_TARGET}
                             COMMAND ${SYCL_COMPILER} 
                                     ${SYCL_COMPILER_FLAGS}
@@ -135,13 +120,12 @@ if (oneapi)
       message(STATUS "_COMPILE_DEFINITIONS ${_COMPILE_DEFINITIONS}")
 
       # Compile the sycl source files with the found sycl compiler
-      separate_arguments(SYCL_COMPILER_FLAGS NATIVE_COMMAND ${SYCL_COMPILER_FLAGS})
       foreach(src ${ARG_SOURCES})
         set(_output_path ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${ARG_TARGET}.dir/${src}${CMAKE_CXX_OUTPUT_EXTENSION})
         list(APPEND _outputs ${_output_path})
 
         add_custom_command(OUTPUT ${_output_path}
-                            COMMAND ${SYCL_COMPILER}
+                            COMMAND ${SYCL_COMPILER}  
                                     ${SYCL_COMPILER_FLAGS} -c
                                     ${_inc_dirs} 
                                     ${_COMPILE_DEFINITIONS}

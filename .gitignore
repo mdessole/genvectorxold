@@ -6,3 +6,6 @@ build*
 
 # ipynb_checkpoints
 plots/.ipynb_checkpoints
+
+# nsys report
+nsysreport
