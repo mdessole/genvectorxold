@@ -54,7 +54,7 @@ if (oneapi)
       foreach(comp_def ${ARG_COMPILE_DEFINITIONS})
         list(APPEND _COMPILE_DEFINITIONS -D${comp_def})
       endforeach()
-      list(JOIN _COMPILE_DEFINITIONS " " _COMPILE_DEFINITIONS)
+
       message(STATUS "_COMPILE_DEFINITIONS ${_COMPILE_DEFINITIONS}")
 
       # Compile the sycl source files with the found sycl compiler
