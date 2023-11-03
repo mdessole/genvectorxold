@@ -64,7 +64,6 @@ if (oneapi)
       foreach(comp_def ${ARG_COMPILE_DEFINITIONS})
         list(APPEND _COMPILE_DEFINITIONS -D${comp_def})
       endforeach()
-      message(STATUS "_COMPILE_DEFINITIONS ${_COMPILE_DEFINITIONS}")
 
       # Compile the sycl source files with the found sycl compiler
       foreach(src ${ARG_SOURCES})
@@ -89,6 +88,7 @@ if (oneapi)
       message(STATUS "SYCL linker flags: ${SYCL_LINKER_FLAGS}")
       separate_arguments(SYCL_LINKER_FLAGS NATIVE_COMMAND ${SYCL_LINKER_FLAGS})
 
+      set_property(TARGET ${ARG_TARGET} PROPERTY SOURCES ${_outputs})  
       add_custom_command(TARGET ${ARG_TARGET}
                             COMMAND ${SYCL_COMPILER} 
                                     ${SYCL_COMPILER_FLAGS}
@@ -107,17 +107,24 @@ if (oneapi)
     function(add_sycl_to_root_target)
       CMAKE_PARSE_ARGUMENTS(ARG "" "TARGET" "SOURCES;HEADERS;DEPENDENCIES;INCLUDE_DIRECTORIES;COMPILE_DEFINITIONS" ${ARGN})
 
+      set(_library_name ${ARG_TARGET})
+
       # Get include directories for the SYCL target
       set(_inc_dirs ${ARG_INCLUDE_DIRECTORIES})
       if (_inc_dirs)
         list(REMOVE_DUPLICATES _inc_dirs)
         list(TRANSFORM _inc_dirs PREPEND -I)
       endif()
+      list(APPEND _inc_dirs ${SYCL_INCLUDE_DIR})
+      list(APPEND _inc_dirs ${SYCL_INCLUDE_DIR}/sycl)
+
+      foreach(lib ${ARG_DEPENDENCIES})
+        list(APPEND _lib_dep_paths "$<TARGET_FILE:${lib}>")
+      endforeach()
 
       foreach(comp_def ${ARG_COMPILE_DEFINITIONS})
         list(APPEND _COMPILE_DEFINITIONS -D${comp_def})
       endforeach()
-      message(STATUS "_COMPILE_DEFINITIONS ${_COMPILE_DEFINITIONS}")
 
       # Compile the sycl source files with the found sycl compiler
       foreach(src ${ARG_SOURCES})
@@ -137,24 +144,17 @@ if (oneapi)
                             )
       endforeach()
 
-      set(SYCL_LINKER_FLAGS "-shared -fsycl -fsycl-unnamed-lambda ${_fsycl_targets} -fPIC ${CMAKE_CXX_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}")
+      set(SYCL_LINKER_FLAGS "-shared -Wl,-soname,$<TARGET_FILE:${_library_name}> -L${SYCL_LIB_DIR} ${CMAKE_SHARED_LINKER_FLAGS} -Wl,-rpath,${SYCL_LIB_DIR}:$<TARGET_FILE_DIR:${_library_name}>")
       separate_arguments(SYCL_LINKER_FLAGS NATIVE_COMMAND ${SYCL_LINKER_FLAGS})
-
-      foreach(lib ${ARG_DEPENDENCIES})
-        list(APPEND _lib_dep_paths "$<TARGET_FILE:${lib}>")
-      endforeach()
-
-      list(APPEND _inc_dirs ${SYCL_INCLUDE_DIR})
-      list(APPEND _inc_dirs ${SYCL_INCLUDE_DIR}/sycl)
       
       add_custom_command(OUTPUT ${ARG_TARGET}
                           COMMAND ${SYCL_COMPILER}
                                   ${SYCL_LINKER_FLAGS}
                                   ${_lib_dep_paths} ${_inc_dirs}
                                   ${_COMPILE_DEFINITIONS} 
-                                  -o $<TARGET_FILE:${ARG_TARGET}>
+                                  -o  $<TARGET_FILE:${_library_name}>
                                   ${_outputs}
-                          DEPENDS ${ARG_DEPENDENCIES} ${_outputs} ${_sycl_target}
+                          DEPENDS ${ARG_DEPENDENCIES} ${_outputs} 
                           COMMENT "Linking shared library ${ARG_TARGET}"
                           MAIN_DEPENDENCY ${_outputs}
                           )
