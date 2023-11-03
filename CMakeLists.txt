@@ -49,13 +49,11 @@ if (oneapi)
 
     function(add_sycl_to_root_target_exe)
       CMAKE_PARSE_ARGUMENTS(ARG "" "TARGET" "SOURCES;HEADERS;DEPENDENCIES;INCLUDE_DIRECTORIES;COMPILE_DEFINITIONS" ${ARGN})
-  
-      foreach(lib ${ARG_DEPENDENCIES})
-        list(APPEND _lib_dep_paths "$<TARGET_FILE:${lib}>")
-      endforeach()
+
       
       # Get include directories for the SYCL target
       set(_inc_dirs ${ARG_INCLUDE_DIRECTORIES})
+      list(APPEND _inc_dirs ${SYCL_INCLUDE_DIR})
       if (_inc_dirs)
         list(REMOVE_DUPLICATES _inc_dirs)
         list(TRANSFORM _inc_dirs PREPEND -I)
@@ -83,17 +81,25 @@ if (oneapi)
                             )
       endforeach()
 
-
-      set(SYCL_LINKER_FLAGS "-L${SYCL_LIB_DIR}  -Wl,-rpath,${SYCL_LIB_DIR}:$<TARGET_FILE_DIR:${ARG_TARGET}>")
+      set(SYCL_LINKER_FLAGS "-L${SYCL_LIB_DIR}  -Wl,-rpath,${SYCL_LIB_DIR}")
+      foreach(lib ${ARG_DEPENDENCIES})
+        list(APPEND _lib_dep_paths "$<TARGET_FILE:${lib}>")
+        list(APPEND SYCL_LINKER_FLAGS ":$<TARGET_FILE_DIR:${lib}>")
+      endforeach()
+      string(REPLACE ";" "" SYCL_LINKER_FLAGS ${SYCL_LINKER_FLAGS})
+      #message(STATUS "_lib_paths: ${_lib_paths}")
+      #message(STATUS "__lib_paths: ${__lib_paths}")
+      #set(SYCL_LINKER_FLAGS "-L${SYCL_LIB_DIR}  -Wl,-rpath,${SYCL_LIB_DIR}:$<TARGET_FILE_DIR:${ARG_TARGET}>")
       message(STATUS "SYCL linker flags: ${SYCL_LINKER_FLAGS}")
       separate_arguments(SYCL_LINKER_FLAGS NATIVE_COMMAND ${SYCL_LINKER_FLAGS})
+      set_target_properties(${ARG_TARGET} PROPERTIES LINKER_LANGUAGE CXX)
 
       set_property(TARGET ${ARG_TARGET} PROPERTY SOURCES ${_outputs})  
+
       add_custom_command(TARGET ${ARG_TARGET}
                             COMMAND ${SYCL_COMPILER} 
                                     ${SYCL_COMPILER_FLAGS}
-                                    ${_inc_dirs}
-                                    -L${SYCL_LIB_DIR} -lsycl
+                                    ${SYCL_LINKER_FLAGS}
                                     ${_lib_dep_paths}
                                     ${_COMPILE_DEFINITIONS}
                                     -o ${ARG_TARGET} ${_outputs} 
