@@ -1,16 +1,11 @@
 if (oneapi)
-  add_executable(CoordsOneAPI Coords.cpp)
-  target_link_options(CoordsOneAPI PUBLIC -E)
-  add_sycl_to_root_target_exe(TARGET CoordsOneAPI SOURCES Coords.cpp DEPENDENCIES GenVectorX SYCLMath INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc COMPILE_DEFINITIONS ROOT_MATH_SYCL)
   add_executable(InvariantMassesSYCL InvariantMassesSYCL.cxx)
   target_link_options(InvariantMassesSYCL PUBLIC -E)
   add_sycl_to_root_target_exe(TARGET InvariantMassesSYCL SOURCES InvariantMassesSYCL.cxx DEPENDENCIES GenVectorX SYCLMath INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc COMPILE_DEFINITIONS ROOT_MATH_SYCL COMPILE_TIMING)
 endif()
 
 if (opensycl)
-  add_executable(CoordsOpenSYCL Coords.cpp)
-  add_sycl_to_root_target(TARGET CoordsOpenSYCL SOURCES Coords.cpp DEPENDENCIES GenVectorX SYCLMath INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc COMPILE_DEFINITIONS ROOT_MATH_SYCL)
-  add_executable(InvariantMassesSYCL InvariantMassesSYCL.cxx)
+   add_executable(InvariantMassesSYCL InvariantMassesSYCL.cxx)
   add_sycl_to_root_target(TARGET InvariantMassesSYCL SOURCES InvariantMassesSYCL.cxx DEPENDENCIES GenVectorX SYCLMath INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc COMPILE_DEFINITIONS ROOT_MATH_SYCL)
 endif()
 

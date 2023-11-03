@@ -179,7 +179,7 @@ int main(int argc, char **argv) {
   auto u_vectors = GenVectors(N);
   auto v_vectors = GenVectors(N);
 
-  static sycl::queue queue{sycl::default_selector{}};
+  static sycl::queue queue{sycl::default_selector_v};
 
   Vector<arithmetic_type> masses =
       InvariantMasses(u_vectors, v_vectors, N, local_size, queue);
