@@ -15,6 +15,8 @@ endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/inc)
 
+string(TOUPPER "${CMAKE_BUILD_TYPE}" _BUILD_TYPE_UPPER)
+
 if (oneapi)
    SET(_sycl_search_dirs ${SYCL_ROOT_DIR} /usr/lib /usr/local/lib /opt/intel/oneapi/compiler/latest/linux)
    find_program(SYCL_COMPILER
@@ -30,38 +32,28 @@ if (oneapi)
              HINTS ${_sycl_search_dirs}
              PATH_SUFFIXES lib)
 
-    set(SYCL_COMPILER_FLAGS "-fsycl -fsycl-unnamed-lambda -sycl-std=2020 -fPIC")
-    if (sycl_targets)
-      list(APPEND SYCL_COMPILER_FLAGS "-fsycl-targets=${sycl_targets}")   
+    
+
+    if (syclcuda)
+      set(_fsycl_targets "-fsycl-targets=nvptx64-nvidia-cuda,spir64_x86_64,spir64 -Xsycl-target-backend=nvptx64-nvidia-cuda --cuda-gpu-arch=sm_${CMAKE_CUDA_ARCHITECTURES} --cuda-path=${CUDA_TOOLKIT_ROOT_DIR}")
+    else()
+        set(_fsycl_targets "-fsycl-targets=spir64_x86_64,spir64")
     endif()
-    if (sycl_target_backend)
-      list(APPEND SYCL_COMPILER_FLAGS "-Xsycl-target-backend=${sycl_target_backend}")   
-    endif()
-    if (offload_arch)
-      list(APPEND SYCL_COMPILER_FLAGS "--offload-arch=${offload_arch}")   
-    endif()
-    if (gpu_arch)
-      list(APPEND SYCL_COMPILER_FLAGS "--gpu-arch=${gpu_arch}")   
-    endif()
-    list(APPEND SYCL_COMPILER_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${_BUILD_TYPE_UPPER}}")
-    list(JOIN SYCL_COMPILER_FLAGS " " SYCL_COMPILER_FLAGS)
-    message(STATUS "SYCL flags: ${SYCL_COMPILER_FLAGS}")
-    message(STATUS "SYCL_COMPILER: ${SYCL_COMPILER}")
-    message(STATUS "SYCL_INCLUDE_DIR: ${SYCL_INCLUDE_DIR}")
-    message(STATUS "SYCL_LIB_DIR: ${SYCL_LIB_DIR}")
+
+    set(SYCL_COMPILER_FLAGS "-fPIC -fsycl -fsycl-unnamed-lambda -sycl-std=2020 ${_fsycl_targets} ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${_BUILD_TYPE_UPPER}}")
+    message(STATUS "SYCL compiler flags: ${SYCL_COMPILER_FLAGS}")
+    separate_arguments(SYCL_COMPILER_FLAGS NATIVE_COMMAND ${SYCL_COMPILER_FLAGS})
 
     if (SYCL_COMPILER)
       set(sycl ON)
 
     function(add_sycl_to_root_target_exe)
       CMAKE_PARSE_ARGUMENTS(ARG "" "TARGET" "SOURCES;HEADERS;DEPENDENCIES;INCLUDE_DIRECTORIES;COMPILE_DEFINITIONS" ${ARGN})
-  
-      foreach(lib ${ARG_DEPENDENCIES})
-        list(APPEND _lib_dep_paths "$<TARGET_FILE:${lib}>")
-      endforeach()
+
       
       # Get include directories for the SYCL target
       set(_inc_dirs ${ARG_INCLUDE_DIRECTORIES})
+      list(APPEND _inc_dirs ${SYCL_INCLUDE_DIR})
       if (_inc_dirs)
         list(REMOVE_DUPLICATES _inc_dirs)
         list(TRANSFORM _inc_dirs PREPEND -I)
@@ -70,21 +62,17 @@ if (oneapi)
       foreach(comp_def ${ARG_COMPILE_DEFINITIONS})
         list(APPEND _COMPILE_DEFINITIONS -D${comp_def})
       endforeach()
-      message(STATUS "_COMPILE_DEFINITIONS ${_COMPILE_DEFINITIONS}")
 
       # Compile the sycl source files with the found sycl compiler
-      separate_arguments(SYCL_COMPILER_FLAGS NATIVE_COMMAND ${SYCL_COMPILER_FLAGS})
-      message(STATUS "SYCL_COMPILER_FLAGS ${SYCL_COMPILER_FLAGS}")
       foreach(src ${ARG_SOURCES})
         set(_output_path ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${ARG_TARGET}.dir/${src}${CMAKE_CXX_OUTPUT_EXTENSION})
         list(APPEND _outputs ${_output_path})
 
         add_custom_command(OUTPUT ${_output_path}
-                            COMMAND ${SYCL_COMPILER} 
+                            COMMAND ${SYCL_COMPILER}
                                     ${SYCL_COMPILER_FLAGS} -c
                                     ${_inc_dirs}
                                     ${_COMPILE_DEFINITIONS}
-                                    ${_lib_dep_paths}
                                     -o ${_output_path}
                                     ${CMAKE_CURRENT_SOURCE_DIR}/${src}
                             DEPENDS ${ARG_DEPENDENCIES}
@@ -93,22 +81,23 @@ if (oneapi)
                             )
       endforeach()
 
-      #foreach(lib ${ARG_DEPENDENCIES})
-      #  list(APPEND _lib_dep_paths "-l${lib}")
-      #endforeach()
+      set(SYCL_LINKER_FLAGS "-L${SYCL_LIB_DIR}  -Wl,-rpath,${SYCL_LIB_DIR}")
+      foreach(lib ${ARG_DEPENDENCIES})
+        list(APPEND _lib_dep_paths "$<TARGET_FILE:${lib}>")
+        list(APPEND SYCL_LINKER_FLAGS ":$<TARGET_FILE_DIR:${lib}>")
+      endforeach()
+      string(REPLACE ";" "" SYCL_LINKER_FLAGS ${SYCL_LINKER_FLAGS})
+    
+      separate_arguments(SYCL_LINKER_FLAGS NATIVE_COMMAND ${SYCL_LINKER_FLAGS})
+      set_target_properties(${ARG_TARGET} PROPERTIES LINKER_LANGUAGE CXX)
 
-      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${_outputs})               
-      set_property(TARGET ${ARG_TARGET} PROPERTY SOURCES ${_outputs})               
-      target_include_directories(${ARG_TARGET} PUBLIC ${SYCL_INCLUDE_DIR} ${SYCL_INCLUDE_DIR}/sycl)
-      target_link_directories(${ARG_TARGET} PUBLIC ${SYCL_LIB_DIR})
-      target_link_libraries(${ARG_TARGET} INTERFACE ${ARG_DEPENDENCIES})
-      target_link_libraries(${ARG_TARGET} PUBLIC sycl)
-      target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
+      set_property(TARGET ${ARG_TARGET} PROPERTY SOURCES ${_outputs})  
+      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${ARG_DEPENDENCIES})
+
       add_custom_command(TARGET ${ARG_TARGET}
                             COMMAND ${SYCL_COMPILER} 
                                     ${SYCL_COMPILER_FLAGS}
-                                    ${_inc_dirs}
-                                    -L${SYCL_LIB_DIR} -lsycl
+                                    ${SYCL_LINKER_FLAGS}
                                     ${_lib_dep_paths}
                                     ${_COMPILE_DEFINITIONS}
                                     -o ${ARG_TARGET} ${_outputs} 
@@ -122,26 +111,32 @@ if (oneapi)
     function(add_sycl_to_root_target)
       CMAKE_PARSE_ARGUMENTS(ARG "" "TARGET" "SOURCES;HEADERS;DEPENDENCIES;INCLUDE_DIRECTORIES;COMPILE_DEFINITIONS" ${ARGN})
 
+      set(_library_name ${ARG_TARGET})
+
       # Get include directories for the SYCL target
       set(_inc_dirs ${ARG_INCLUDE_DIRECTORIES})
       if (_inc_dirs)
         list(REMOVE_DUPLICATES _inc_dirs)
         list(TRANSFORM _inc_dirs PREPEND -I)
       endif()
+      list(APPEND _inc_dirs ${SYCL_INCLUDE_DIR})
+      list(APPEND _inc_dirs ${SYCL_INCLUDE_DIR}/sycl)
+
+      foreach(lib ${ARG_DEPENDENCIES})
+        list(APPEND _lib_dep_paths "$<TARGET_FILE:${lib}>")
+      endforeach()
 
       foreach(comp_def ${ARG_COMPILE_DEFINITIONS})
         list(APPEND _COMPILE_DEFINITIONS -D${comp_def})
       endforeach()
-      message(STATUS "_COMPILE_DEFINITIONS ${_COMPILE_DEFINITIONS}")
 
       # Compile the sycl source files with the found sycl compiler
-      separate_arguments(SYCL_COMPILER_FLAGS NATIVE_COMMAND ${SYCL_COMPILER_FLAGS})
       foreach(src ${ARG_SOURCES})
         set(_output_path ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${ARG_TARGET}.dir/${src}${CMAKE_CXX_OUTPUT_EXTENSION})
         list(APPEND _outputs ${_output_path})
 
         add_custom_command(OUTPUT ${_output_path}
-                            COMMAND ${SYCL_COMPILER}
+                            COMMAND ${SYCL_COMPILER}  
                                     ${SYCL_COMPILER_FLAGS} -c
                                     ${_inc_dirs} 
                                     ${_COMPILE_DEFINITIONS}
@@ -153,35 +148,24 @@ if (oneapi)
                             )
       endforeach()
 
-      set(SYCL_LINKER_FLAGS "-shared -fsycl -fsycl-unnamed-lambda ${_fsycl_targets} -fPIC ${CMAKE_CXX_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}")
+      set(SYCL_LINKER_FLAGS "-shared -Wl,-soname,$<TARGET_FILE:${_library_name}> -L${SYCL_LIB_DIR} ${CMAKE_SHARED_LINKER_FLAGS} -Wl,-rpath,${SYCL_LIB_DIR}:$<TARGET_FILE_DIR:${_library_name}>")
       separate_arguments(SYCL_LINKER_FLAGS NATIVE_COMMAND ${SYCL_LINKER_FLAGS})
+      message(STATUS "SYCL linker flags: ${SYCL_LINKER_FLAGS}")
+      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${_outputs})
+      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${ARG_DEPENDENCIES})
 
-      foreach(lib ${ARG_DEPENDENCIES})
-        list(APPEND _lib_dep_paths "$<TARGET_FILE:${lib}>")
-      endforeach()
-
-      list(APPEND _inc_dirs ${SYCL_INCLUDE_DIR})
-      list(APPEND _inc_dirs ${SYCL_INCLUDE_DIR}/sycl)
-      
       add_custom_command(OUTPUT ${ARG_TARGET}
                           COMMAND ${SYCL_COMPILER}
                                   ${SYCL_LINKER_FLAGS}
                                   ${_lib_dep_paths} ${_inc_dirs}
                                   ${_COMPILE_DEFINITIONS} 
-                                  -o $<TARGET_FILE:${ARG_TARGET}>
+                                  -o  $<TARGET_FILE:${_library_name}>
                                   ${_outputs}
-                          DEPENDS ${ARG_DEPENDENCIES} ${_outputs} ${_sycl_target}
-                          COMMENT "Linking shared library ${ARG_TARGET}"
+                          DEPENDS ${ARG_DEPENDENCIES} ${_outputs} 
+                          COMMENT "Linking shared library ${_library_name}"
                           MAIN_DEPENDENCY ${_outputs}
                           )
 
-      set_property(TARGET ${ARG_TARGET} PROPERTY LINK_DEPENDS ${_outputs})
-      set_property(TARGET ${ARG_TARGET} PROPERTY SOURCES ${_outputs})  
-      set_target_properties(${ARG_TARGET} PROPERTIES LINKER_LANGUAGE CXX)
-      target_include_directories(${ARG_TARGET} PUBLIC ${SYCL_INCLUDE_DIR} ${SYCL_INCLUDE_DIR}/sycl)
-      target_link_directories(${ARG_TARGET} PUBLIC ${SYCL_LIB_DIR})
-      target_link_libraries(${ARG_TARGET} INTERFACE sycl)
-      target_compile_definitions(${ARG_TARGET} PUBLIC ${ARG_COMPILE_DEFINITIONS})
 
    endfunction()
 
@@ -413,7 +397,7 @@ if ((cuda) OR (sycl))
   if (sycl)
       set_target_properties(VecOps PROPERTIES LINKER_LANGUAGE CXX)
       #target_compile_definitions(VecOps PUBLIC ROOT_MATH_SYCL)
-      add_sycl_to_root_target(TARGET VecOps SOURCES src/VecOps.cxx HEADERS inc/SYCLMath/VecOps.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc/ COMPILE_DEFINITIONS ROOT_MATH_SYCL ROOT_MEAS_TIMING )
+      add_sycl_to_root_target(TARGET VecOps SOURCES src/VecOps.cxx HEADERS inc/SYCLMath/VecOps.h INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/inc/ DEPENDENCIES GenVectorX SYCLMath COMPILE_DEFINITIONS ROOT_MATH_SYCL ROOT_MEAS_TIMING )
   endif()
 
   install(TARGETS GenVectorX SYCLMath VecOps

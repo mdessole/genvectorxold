@@ -3,7 +3,6 @@
 #include <chrono>
 #include <iostream>
 
-
 #if defined(ROOT_MATH_SYCL)
 #include <sycl/sycl.hpp>
 using mode = sycl::access::mode;
@@ -63,22 +62,23 @@ namespace ROOT
 
       Scalar *invMasses = new Scalar[N];
 
+      // Allocate device input vector
+      LVector *d_v1 = NULL;
+      ERRCHECK(cudaMalloc((void **)&d_v1, N * sizeof(LVector)));
+
+      // Allocate device input vector
+      LVector *d_v2 = NULL;
+      ERRCHECK(cudaMalloc((void **)&d_v2, N * sizeof(LVector)));
+
+      // Allocate the device output vector
+      Scalar *d_invMasses = NULL;
+      ERRCHECK(cudaMalloc((void **)&d_invMasses, N * sizeof(Scalar)));
+
 #ifdef ROOT_MEAS_TIMING
       auto start = std::chrono::system_clock::now();
 #endif
 
       {
-        // Allocate device input vector
-        LVector *d_v1 = NULL;
-        ERRCHECK(cudaMalloc((void **)&d_v1, N * sizeof(LVector)));
-
-        // Allocate device input vector
-        LVector *d_v2 = NULL;
-        ERRCHECK(cudaMalloc((void **)&d_v2, N * sizeof(LVector)));
-
-        // Allocate the device output vector
-        Scalar *d_invMasses = NULL;
-        ERRCHECK(cudaMalloc((void **)&d_invMasses, N * sizeof(Scalar)));
 
         cudaMemcpy(d_v1, v1, N * sizeof(LVector), cudaMemcpyHostToDevice);
         cudaMemcpy(d_v2, v2, N * sizeof(LVector), cudaMemcpyHostToDevice);
@@ -86,10 +86,6 @@ namespace ROOT
         InvariantMassesKernel<<<N / local_size + 1, local_size>>>(d_v1, d_v2, d_invMasses, N);
 
         ERRCHECK(cudaMemcpy(invMasses, d_invMasses, N * sizeof(Scalar), cudaMemcpyDeviceToHost));
-
-        ERRCHECK(cudaFree(d_v1));
-        ERRCHECK(cudaFree(d_v2));
-        ERRCHECK(cudaFree(d_invMasses));
       }
 
 #ifdef ROOT_MEAS_TIMING
@@ -100,6 +96,9 @@ namespace ROOT
           1e-6;
       std::cout << "cuda time " << duration << " (s)" << std::endl;
 #endif
+      ERRCHECK(cudaFree(d_v1));
+      ERRCHECK(cudaFree(d_v2));
+      ERRCHECK(cudaFree(d_invMasses));
 
       return invMasses;
     }
