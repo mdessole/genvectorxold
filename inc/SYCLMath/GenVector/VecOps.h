@@ -78,15 +78,12 @@ namespace ROOT
       auto start = std::chrono::system_clock::now();
 #endif
 
-      {
+      cudaMemcpy(d_v1, v1, N * sizeof(LVector), cudaMemcpyHostToDevice);
+      cudaMemcpy(d_v2, v2, N * sizeof(LVector), cudaMemcpyHostToDevice);
 
-        cudaMemcpy(d_v1, v1, N * sizeof(LVector), cudaMemcpyHostToDevice);
-        cudaMemcpy(d_v2, v2, N * sizeof(LVector), cudaMemcpyHostToDevice);
+      InvariantMassesKernel<<<N / local_size + 1, local_size>>>(d_v1, d_v2, d_invMasses, N);
 
-        InvariantMassesKernel<<<N / local_size + 1, local_size>>>(d_v1, d_v2, d_invMasses, N);
-
-        ERRCHECK(cudaMemcpy(invMasses, d_invMasses, N * sizeof(Scalar), cudaMemcpyDeviceToHost));
-      }
+      ERRCHECK(cudaMemcpy(invMasses, d_invMasses, N * sizeof(Scalar), cudaMemcpyDeviceToHost));
 
 #ifdef ROOT_MEAS_TIMING
       auto end = std::chrono::system_clock::now();
@@ -112,24 +109,23 @@ namespace ROOT
 #ifdef ROOT_MEAS_TIMING
       auto start = std::chrono::system_clock::now();
 #endif
-      {
-        // Allocate the device input vector
-        LVector *d_v1 = NULL;
-        ERRCHECK(cudaMalloc((void **)&d_v1, N * sizeof(LVector)));
 
-        // Allocate the device output vector
-        Scalar *d_invMasses = NULL;
-        ERRCHECK(cudaMalloc((void **)&d_invMasses, N * sizeof(Scalar)));
-        ERRCHECK(cudaMemcpy(d_v1, v1, N * sizeof(LVector), cudaMemcpyHostToDevice));
+      // Allocate the device input vector
+      LVector *d_v1 = NULL;
+      ERRCHECK(cudaMalloc((void **)&d_v1, N * sizeof(LVector)));
 
-        cudaDeviceSynchronize();
-        InvariantMassKernel<<<N / local_size + 1, local_size>>>(d_v1, d_invMasses, N);
+      // Allocate the device output vector
+      Scalar *d_invMasses = NULL;
+      ERRCHECK(cudaMalloc((void **)&d_invMasses, N * sizeof(Scalar)));
+      ERRCHECK(cudaMemcpy(d_v1, v1, N * sizeof(LVector), cudaMemcpyHostToDevice));
 
-        ERRCHECK(cudaMemcpy(invMasses, d_invMasses, N * sizeof(Scalar), cudaMemcpyDeviceToHost));
+      cudaDeviceSynchronize();
+      InvariantMassKernel<<<N / local_size + 1, local_size>>>(d_v1, d_invMasses, N);
 
-        ERRCHECK(cudaFree(d_v1));
-        ERRCHECK(cudaFree(d_invMasses));
-      }
+      ERRCHECK(cudaMemcpy(invMasses, d_invMasses, N * sizeof(Scalar), cudaMemcpyDeviceToHost));
+
+      ERRCHECK(cudaFree(d_v1));
+      ERRCHECK(cudaFree(d_invMasses));
 
 #ifdef ROOT_MEAS_TIMING
       auto end = std::chrono::system_clock::now();
@@ -197,37 +193,26 @@ namespace ROOT
     {
 
       Scalar *invMasses = new Scalar[N];
-      std::cout << "sycl::queue check - selected device:\n"
-                << queue.get_device().get_info<sycl::info::device::name>()
-                << std::endl;
+
+      LVector *d_v1 = sycl::malloc_device<LVector>(N , queue);
+      LVector *d_v2 = sycl::malloc_device<LVector>(N , queue);
+      Scalar *d_invMasses = sycl::malloc_device<Scalar>(N , queue);
 
 #ifdef ROOT_MEAS_TIMING
       auto start = std::chrono::system_clock::now();
 #endif
 
-      { // Start of scope, ensures data copied back to host
-        // Create device buffers. The memory is managed by SYCL so we should NOT
-        // access these buffers directly.
-        auto execution_range = sycl::nd_range<1>{
-            sycl::range<1>{((N + local_size - 1) / local_size) * local_size},
-            sycl::range<1>{local_size}};
+      auto execution_range = sycl::nd_range<1>{
+          sycl::range<1>{((N + local_size - 1) / local_size) * local_size},
+          sycl::range<1>{local_size}};
 
-        sycl::buffer<LVector, 1> v1_sycl(v1, sycl::range<1>(N));
-        sycl::buffer<LVector, 1> v2_sycl(v2, sycl::range<1>(N));
-        sycl::buffer<Scalar, 1> m_sycl(invMasses, sycl::range<1>(N));
+      queue.memcpy(d_v1, v1, N * sizeof(LVector));
+      queue.memcpy(d_v2, v2, N * sizeof(LVector));
 
-        queue.submit([&](sycl::handler &cgh)
-                     {
-                       // Get handles to SYCL buffers.
-                       sycl::accessor v1_acc{v1_sycl, cgh, sycl::range<1>(N), sycl::read_only};
-                       sycl::accessor v2_acc{v2_sycl, cgh, sycl::range<1>(N), sycl::read_only};
-                       sycl::accessor m_acc{m_sycl, cgh, sycl::range<1>(N), sycl::write_only};
-                       //auto v1_acc = v1_sycl.get_access<mode::read>(cgh);
-                       //auto v2_acc = v2_sycl.get_access<mode::read>(cgh);
-                       //auto m_acc = m_sycl.get_access<mode::write>(cgh);
+      queue.submit([&](sycl::handler &cgh)
+                   { cgh.parallel_for(execution_range, InvariantMassesKernel<Scalar *, LVector *>(d_v1, d_v2, d_invMasses, N)); });
 
-                       cgh.parallel_for(execution_range, InvariantMassesKernel(v1_acc, v2_acc, m_acc, N)); });
-      } // end of scope, ensures data copied back to host
+      queue.memcpy(invMasses, d_invMasses, N * sizeof(Scalar));
       queue.wait();
 
 #ifdef ROOT_MEAS_TIMING
@@ -238,6 +223,12 @@ namespace ROOT
           1e-6;
       std::cout << "sycl time " << duration << " (s)" << std::endl;
 #endif
+
+      sycl::free(d_v1,queue);
+      sycl::free(d_v2,queue);
+      sycl::free(d_invMasses,queue);
+      queue.wait();
+
       return invMasses;
     }
 
