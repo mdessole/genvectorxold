@@ -119,13 +119,9 @@ namespace ROOT
       ERRCHECK(cudaMalloc((void **)&d_invMasses, N * sizeof(Scalar)));
       ERRCHECK(cudaMemcpy(d_v1, v1, N * sizeof(LVector), cudaMemcpyHostToDevice));
 
-      cudaDeviceSynchronize();
       InvariantMassKernel<<<N / local_size + 1, local_size>>>(d_v1, d_invMasses, N);
 
       ERRCHECK(cudaMemcpy(invMasses, d_invMasses, N * sizeof(Scalar), cudaMemcpyDeviceToHost));
-
-      ERRCHECK(cudaFree(d_v1));
-      ERRCHECK(cudaFree(d_invMasses));
 
 #ifdef ROOT_MEAS_TIMING
       auto end = std::chrono::system_clock::now();
@@ -135,6 +131,9 @@ namespace ROOT
           1e-6;
       std::cout << "cuda time " << duration << " (s)" << std::endl;
 #endif
+
+      ERRCHECK(cudaFree(d_v1));
+      ERRCHECK(cudaFree(d_invMasses));
 
       return invMasses;
     }
