@@ -20,7 +20,7 @@ if (opensycl)
 endif()
 
 
-if (cuda)
+if (cudaaa)
   add_executable(InvariantMassesCUDA InvariantMassesCUDA.cu)
   set_target_properties(InvariantMassesCUDA PROPERTIES LINKER_LANGUAGE CUDA)
   target_link_libraries(InvariantMassesCUDA PUBLIC GenVectorX SYCLMath VecOps)
@@ -35,6 +35,11 @@ if (cuda)
     set_target_properties(SInvariantMassesCUDA PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
     target_compile_definitions(SInvariantMassesCUDA PUBLIC ROOT_MATH_CUDA ROOT_MEAS_TIMING SINGLE_PRECISION)
   endif()
+endif()
+
+if (cuda)
+  add_executable(InvariantMassesCUDA InvariantMassesCUDA.cxx)
+  target_link_libraries(InvariantMassesCUDA PUBLIC GenVectorX SYCLMath VecOps)
 endif()
 
 add_executable(InvariantMasses InvariantMasses.cxx)
