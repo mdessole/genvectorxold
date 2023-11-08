@@ -14,7 +14,7 @@ using vec4d = ROOT::Experimental::LorentzVector<
 template <class T>
 using Vector = std::vector<T>;
 
-vec4d* GenVectors(int n)
+vec4d *GenVectors(int n)
 {
   vec4d *vectors = new vec4d[n];
 
@@ -43,29 +43,36 @@ int main(int argc, char **argv)
   std::string arg1 = argv[1];
   std::size_t pos;
   std::size_t N = std::stoi(arg1, &pos);
+  std::string arg2 = argv[2];
+  std::size_t nruns = std::stoi(arg2, &pos);
   size_t local_size = 128;
 
   auto u_vectors = GenVectors(N);
   auto v_vectors = GenVectors(N);
 
 #ifdef ROOT_MEAS_TIMING
-      std::cout<< "ROOT_MEAS_TIMING defined \n"; 
+  std::cout << "ROOT_MEAS_TIMING defined \n";
 #endif
 #ifdef ROOT_MATH_SYCL
-      std::cout<< "ROOT_MATH_SYCL defined \n"; 
+  std::cout << "ROOT_MATH_SYCL defined \n";
 #endif
 #ifdef ROOT_MATH_CUDA
-      std::cout<< "ROOT_MATH_CUDA defined \n"; 
+  std::cout << "ROOT_MATH_CUDA defined \n";
 #endif
 #ifdef SINGLE_PRECISION
-      std::cout<< "SINGLE_PRECISION defined \n"; 
+  std::cout << "SINGLE_PRECISION defined \n";
 #endif
-
 
   static sycl::queue queue{sycl::default_selector_v};
 
-  auto masses =
-      ROOT::Experimental::InvariantMasses<arithmetic_type, vec4d>(u_vectors, v_vectors, N, local_size, queue);
+  std::cout << "sycl::queue check - selected device:\n"
+                << queue.get_device().get_info<sycl::info::device::name>()
+                << std::endl;
+
+  arithmetic_type *masses = new arithmetic_type[N];
+
+  for (size_t i = 0; i < nruns; i++)
+    masses = ROOT::Experimental::InvariantMasses<arithmetic_type, vec4d>(u_vectors, v_vectors, N, local_size, queue);
 
   for (size_t i = 0; i < N; i++)
     assert(print_if_false((std::abs(masses[i] - 2.) <= 1e-5), i));

@@ -64,17 +64,23 @@ int main(int argc, char **argv)
   std::string arg1 = argv[1];
   std::size_t pos;
   std::size_t N = std::stoi(arg1, &pos);
+  std::string arg2 = argv[2];
+  std::size_t nruns = std::stoi(arg2, &pos);
   size_t local_size = 128;
 
   vec4d* u_vectors = GenVectors(N);
   vec4d* v_vectors = GenVectors(N);
 
+  arithmetic_type* masses =  new arithmetic_type[N];
 
-  arithmetic_type* masses = ROOT::Experimental::InvariantMasses<arithmetic_type, vec4d>(u_vectors, v_vectors, N, local_size);
+  for (size_t i=0; i<nruns; i++)
+    masses = ROOT::Experimental::InvariantMasses<arithmetic_type, vec4d>(u_vectors, v_vectors, N, local_size);
 
   for (size_t i=0; i<N; i++)
     assert(print_if_false((std::abs(masses[i] - 2.) <= 1e-5), i) );
 
+  delete[] u_vectors;
+  delete[] v_vectors;
   delete[] masses;
   return 0;
 }
